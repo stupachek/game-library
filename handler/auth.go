@@ -15,7 +15,6 @@ func (u *UserHandler) Register(c *gin.Context) {
 
 	}
 	err := u.UserService.Register(registerUser)
-	registerUser.Password = ""
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
 		return

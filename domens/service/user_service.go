@@ -32,7 +32,6 @@ func (u *UserService) Register(registerUser models.RegisterModel) error {
 	if err != nil {
 		return ErrUnauthenticated
 	}
-	registerUser.Password = ""
 	user := models.User{
 		Email:          registerUser.Email,
 		Username:       registerUser.Username,
