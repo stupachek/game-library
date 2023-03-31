@@ -52,7 +52,6 @@ func newPassword(password string) (string, error) {
 	argon := argon2.DefaultConfig()
 
 	hashedPasword, err := argon.HashEncoded([]byte(password))
-	password = ""
 	if err != nil {
 		return "", err
 	}
