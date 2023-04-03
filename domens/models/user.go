@@ -25,6 +25,12 @@ type RegisterModel struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=3,max=20"`
 }
+
+type LoginModel struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=3,max=20"`
+}
+
 type ErrorMsg struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`

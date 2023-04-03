@@ -9,13 +9,15 @@ import (
 )
 
 var (
-	dublicateUsernameError error = errors.New("user with the username is already exist")
-	dublicateEmailError    error = errors.New("user with the email is already exist")
-	dublicateIDError       error = errors.New("user with the ID is already exist")
+	ErrDublicateUsername error = errors.New("user with the username is already exist")
+	ErrDublicateEmail    error = errors.New("user with the email is already exist")
+	ErrDublicateID       error = errors.New("user with the ID is already exist")
+	ErrUnknownUser       error = errors.New("unknown user")
 )
 
 type IUserRepo interface {
 	CreateUser(models.User) error
+	GetUserByEmail(email string) (models.User, error)
 }
 
 type TestUserRepo struct {
@@ -27,6 +29,15 @@ func NewUserRepo() *TestUserRepo {
 	return &TestUserRepo{
 		Users: make(map[uuid.UUID]models.User),
 	}
+}
+
+func (t *TestUserRepo) GetUserByEmail(email string) (models.User, error) {
+	for _, user := range t.Users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
+	return models.User{}, ErrUnknownUser
 }
 
 func (t *TestUserRepo) CreateUser(user models.User) error {
@@ -41,13 +52,13 @@ func (t *TestUserRepo) CreateUser(user models.User) error {
 func (t *TestUserRepo) checkUser(user models.User) error {
 	_, ok := t.Users[user.ID]
 	if ok {
-		return dublicateIDError
+		return ErrDublicateID
 	}
 	for _, u := range t.Users {
 		if u.Email == user.Email {
-			return dublicateEmailError
+			return ErrDublicateEmail
 		} else if u.Username == user.Username {
-			return dublicateUsernameError
+			return ErrDublicateUsername
 		}
 	}
 	return nil

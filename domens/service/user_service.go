@@ -47,6 +47,18 @@ func (u *UserService) Register(registerUser models.RegisterModel) error {
 	return err
 }
 
+func (u *UserService) Login(loginUser models.LoginModel) (string, error) {
+	user, err := u.UserRepo.GetUserByEmail(loginUser.Email)
+	if err != nil {
+		return "", err
+	}
+	ok, err := argon2.VerifyEncoded([]byte(loginUser.Password), []byte(user.HashedPassword))
+	if err != nil || !ok {
+		return "", ErrUnauthenticated
+	}
+	return NewJWT(user.Email)
+}
+
 func newPassword(password string) (string, error) {
 	argon := argon2.DefaultConfig()
 
