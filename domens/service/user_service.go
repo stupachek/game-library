@@ -35,7 +35,6 @@ func (u *UserService) Register(registerUser models.RegisterModel) error {
 	user := models.User{
 		Email:          registerUser.Email,
 		Username:       registerUser.Username,
-		BadgeColor:     hashedPassword,
 		Role:           USER,
 		HashedPassword: hashedPassword,
 	}
