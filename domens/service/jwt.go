@@ -16,14 +16,14 @@ var (
 )
 
 type JWTClaim struct {
-	Email string `json:"id"`
+	ID string `json:"id"`
 	jwt.StandardClaims
 }
 
-func NewJWT(email string) (string, error) {
+func NewJWT(ID string) (string, error) {
 	expirationTime := time.Now().Add(1 * time.Hour)
 	claims := &JWTClaim{
-		Email: email,
+		ID: ID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -44,5 +44,5 @@ func ValidateToken(signedToken string) (string, error) {
 	if claims.ExpiresAt < time.Now().Local().Unix() {
 		return "", ErrOutdated
 	}
-	return claims.Email, nil
+	return claims.ID, nil
 }

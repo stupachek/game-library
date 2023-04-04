@@ -56,7 +56,7 @@ func (u *UserService) Login(loginUser models.LoginModel) (string, error) {
 	if err != nil || !ok {
 		return "", ErrUnauthenticated
 	}
-	return NewJWT(user.Email)
+	return NewJWT(user.ID.String())
 }
 
 func newPassword(password string) (string, error) {
