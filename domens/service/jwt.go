@@ -1,6 +1,7 @@
 package service
 
 import (
+	"crypto/ed25519"
 	"errors"
 	"time"
 
@@ -10,9 +11,9 @@ import (
 var (
 	ErrParseClaim error = errors.New("can't parse claim")
 	ErrOutdated   error = errors.New("token is outdated")
+	Public        ed25519.PublicKey
+	Private       ed25519.PrivateKey
 )
-
-var key = []byte("supersecretkey")
 
 type JWTClaim struct {
 	Email string `json:"id"`
@@ -27,12 +28,12 @@ func NewJWT(email string) (string, error) {
 			ExpiresAt: expirationTime.Unix(),
 		},
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(key)
+	token := jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims)
+	return token.SignedString(Private)
 }
 
 func ValidateToken(signedToken string) (string, error) {
-	token, err := jwt.ParseWithClaims(signedToken, &JWTClaim{}, func(t *jwt.Token) (interface{}, error) { return []byte(key), nil })
+	token, err := jwt.ParseWithClaims(signedToken, &JWTClaim{}, func(t *jwt.Token) (interface{}, error) { return Public, nil })
 	if err != nil {
 		return "", err
 	}

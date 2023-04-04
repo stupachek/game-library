@@ -1,9 +1,11 @@
 package api
 
 import (
+	"crypto/ed25519"
 	"game-library/domens/repository"
 	"game-library/domens/service"
 	"game-library/handler"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +14,11 @@ func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	userRepo := repository.NewUserRepo()
 	userService := service.NewUserService(userRepo)
+	var err error
+	service.Public, service.Private, err = ed25519.GenerateKey(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 	userHandler := handler.NewUserHadler(userService)
 	auth := r.Group("/auth")
 	{
@@ -20,18 +27,3 @@ func SetupRouter() *gin.Engine {
 	}
 	return r
 }
-
-// func (a *App) Run(port string) error {
-// 	server := http.Server{Addr: port, Handler: a.Router}
-// 	a.Server = server
-// 	return a.Server.ListenAndServe()
-// }
-
-// func (a *App) Stop() error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
-// 	if err := a.Server.Shutdown(ctx); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
