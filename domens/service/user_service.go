@@ -108,7 +108,7 @@ func (u *UserService) ChangeRole(idStr string, role string) (models.User, error)
 	if err != nil {
 		return models.User{}, errors.New("can't parse user id")
 	}
-	user := models.User{}
+	var user models.User
 	switch role {
 	case models.USER, models.ADMIN, models.MANAGER:
 		user, err = u.UserRepo.UpdateRole(id, role)
