@@ -14,7 +14,11 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 	userRepo := repository.NewUserRepo()
+	gameRepo := repository.NewGameRepo()
+	publisherRepo := repository.NewPublisherRepo()
 	userService := service.NewUserService(userRepo)
+	gameService := service.NewGameService(gameRepo)
+	publisherService := service.NewPublisherService(publisherRepo)
 	err := userService.SetupAdmin()
 	if err != nil {
 		log.Fatal(err)
@@ -40,6 +44,22 @@ func SetupRouter() *gin.Engine {
 			users.PATCH("/:id", userHandler.ChangerRole)
 			users.DELETE("/:id", userHandler.DeleteUser)
 		}
+	}
+
+	gameHandler := handler.NewGameHandler(gameService)
+	games := r.Group("/games")
+	{
+		games.GET("", gameHandler.GetGamesList)
+	}
+
+	publisherHandler := handler.NewPublisherHandler(publisherService)
+	publishers := r.Group("/publishers")
+	{
+		publishers.GET("", publisherHandler.GetPlatformsList)
+		publishers.POST("", publisherHandler.CreatePublisher)
+		publishers.GET("/:id", publisherHandler.GetPublisher)
+		publishers.PATCH("/:id", publisherHandler.UpdatePublisher)
+		publishers.DELETE("/:id", publisherHandler.DeletePublisher)
 	}
 	return r
 }
