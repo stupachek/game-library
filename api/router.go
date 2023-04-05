@@ -56,10 +56,13 @@ func SetupRouter() *gin.Engine {
 	publishers := r.Group("/publishers")
 	{
 		publishers.GET("", publisherHandler.GetPlatformsList)
-		publishers.POST("", publisherHandler.CreatePublisher)
 		publishers.GET("/:id", publisherHandler.GetPublisher)
-		publishers.PATCH("/:id", publisherHandler.UpdatePublisher)
-		publishers.DELETE("/:id", publisherHandler.DeletePublisher)
+		{
+			publishers.Use(middleware.Auth())
+			publishers.POST("", publisherHandler.CreatePublisher)
+			publishers.PATCH("/:id", publisherHandler.UpdatePublisher)
+			publishers.DELETE("/:id", publisherHandler.DeletePublisher)
+		}
 	}
 	return r
 }
