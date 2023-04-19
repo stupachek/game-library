@@ -49,7 +49,11 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		}
 		plaforms[i] = p
 	}
-	g.GameService.CreateGame(inputGame, dst, genres, plaforms)
+	err := g.GameService.CreateGame(inputGame, dst, genres, plaforms)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully created", "data": gin.H{"link": dst}})
 }
