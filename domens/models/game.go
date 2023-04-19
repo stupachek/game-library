@@ -1,6 +1,7 @@
 package models
 
 import (
+	"mime/multipart"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,6 +20,17 @@ type Game struct {
 	Comments       []Comment
 	Platforms      []PlatformsOnGames
 	Genres         []GenresOnGames
+}
+
+type InputGame struct {
+	Title          string                `form:"title" binding:"required"`
+	Description    string                `form:"description"`
+	File           *multipart.FileHeader `form:"file"`
+	PublisherId    string                `form:"publisherId" binding:"required"`
+	AgeRestriction int                   `form:"ageRestriction" binding:"required"`
+	ReleaseYear    int                   `form:"releaseYear" binding:"required"`
+	Genres         []string              `form:"genres" binding:"required"`
+	Platforms      []string              `form:"platforms" binding:"required"`
 }
 
 type Publisher struct {
@@ -52,6 +64,7 @@ type Genre struct {
 }
 
 type GenresOnGames struct {
+	ID      uint
 	GameId  uuid.UUID
 	GenreId uuid.UUID
 }

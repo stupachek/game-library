@@ -3,12 +3,13 @@ package repository
 import (
 	"errors"
 	"game-library/domens/models"
-	"github.com/google/uuid"
 	"sync"
+
+	"github.com/google/uuid"
 )
 
 var (
-	PublisherNotFound = errors.New("publisher does not exist")
+	ErrPublisherNotFound = errors.New("publisher does not exist")
 )
 
 type IPublisherRepo interface {
@@ -47,7 +48,7 @@ func (t *TestPublisherRepo) CreatePublisher(publisher models.Publisher) models.P
 func (t *TestPublisherRepo) GetPublisherById(id uuid.UUID) (*models.Publisher, error) {
 	publisher, ok := t.Publishers[id]
 	if !ok {
-		return &models.Publisher{}, PublisherNotFound
+		return &models.Publisher{}, ErrPublisherNotFound
 	}
 	return publisher, nil
 }

@@ -9,11 +9,22 @@ type UserHandler struct {
 }
 
 type GameHandler struct {
-	GameService service.GameService
+	GameService      service.GameService
+	PublisherService service.PublisherService
+	GenreService     service.GenreService
+	PlatformService  service.PlatformService
 }
 
 type PublisherHandler struct {
 	PublisherService service.PublisherService
+}
+
+type GenreHandler struct {
+	GenreService service.GenreService
+}
+
+type PlatformHandler struct {
+	PlatformService service.PlatformService
 }
 
 func NewUserHadler(service service.UserService) UserHandler {
@@ -22,9 +33,10 @@ func NewUserHadler(service service.UserService) UserHandler {
 	}
 }
 
-func NewGameHandler(service service.GameService) GameHandler {
+func NewGameHandler(serviceG service.GameService, serviceP service.PublisherService) GameHandler {
 	return GameHandler{
-		GameService: service,
+		GameService:      serviceG,
+		PublisherService: serviceP,
 	}
 }
 
