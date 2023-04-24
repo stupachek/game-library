@@ -73,8 +73,6 @@ func (g *GameService) CreateGame(inputGame models.InputGame, dst string, genres 
 		ImageLink:      dst,
 		AgeRestriction: inputGame.AgeRestriction,
 		ReleaseYear:    inputGame.ReleaseYear,
-		Platforms:      platformsOnGames,
-		Genres:         genresOnGames,
 	}
 	return g.GameRepo.CreateGame(game)
 }

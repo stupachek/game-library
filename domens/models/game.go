@@ -16,10 +16,6 @@ type Game struct {
 	AgeRestriction int
 	ReleaseYear    int
 	UpdatedAt      time.Time
-	Ratings        []Rating
-	Comments       []Comment
-	Platforms      []PlatformsOnGames
-	Genres         []GenresOnGames
 }
 
 type InputGame struct {
@@ -34,9 +30,8 @@ type InputGame struct {
 }
 
 type Publisher struct {
-	ID    uuid.UUID `json:"id"`
-	Name  string    `json:"name"`
-	Games []Game    `json:"games"`
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type Rating struct {
@@ -47,20 +42,19 @@ type Rating struct {
 }
 
 type Platform struct {
-	ID    uuid.UUID
-	Name  string
-	Games []PlatformsOnGames
+	ID   uuid.UUID
+	Name string
 }
 
 type PlatformsOnGames struct {
+	ID         uint
 	GameId     uuid.UUID
 	PlatformId uuid.UUID
 }
 
 type Genre struct {
-	ID    uuid.UUID
-	Name  string
-	Games []GenresOnGames
+	ID   uuid.UUID
+	Name string
 }
 
 type GenresOnGames struct {

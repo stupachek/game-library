@@ -14,16 +14,13 @@ const (
 )
 
 type User struct {
-	ID             uuid.UUID     `json:"id"`
-	Email          string        `json:"email"`
-	Username       string        `json:"usarname"`
-	BadgeColor     string        `json:"badge_color"`
-	Role           string        `json:"role"`
-	HashedPassword string        `json:"-"`
-	CreatedAt      time.Time     `json:"-"` //should it be only in db?
-	Comments       []Comment     `json:"-"`
-	Likes          []CommentLike `json:"-"`
-	Ratings        []Rating      `json:"-"`
+	ID             uuid.UUID `json:"id"`
+	Email          string    `json:"email"`
+	Username       string    `json:"usarname"`
+	BadgeColor     string    `json:"badge_color"`
+	Role           string    `json:"role"`
+	HashedPassword string    `json:"-"`
+	CreatedAt      time.Time `json:"-"` //should it be only in db?
 }
 
 type RegisterModel struct {
