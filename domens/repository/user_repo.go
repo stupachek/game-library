@@ -11,7 +11,7 @@ import (
 var (
 	ErrDublicateUsername error = errors.New("user with the username is already exist")
 	ErrDublicateEmail    error = errors.New("user with the email is already exist")
-	ErrDublicateID       error = errors.New("user with the ID is already exist")
+	ErrDublicateID       error = errors.New("user with the ID already exist")
 	ErrUnknownUser       error = errors.New("unknown user")
 )
 

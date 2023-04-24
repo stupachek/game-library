@@ -1,7 +1,6 @@
 package models
 
 import (
-	"mime/multipart"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,15 +17,15 @@ type Game struct {
 	UpdatedAt      time.Time
 }
 
-type InputGame struct {
-	Title          string                `form:"title" binding:"required"`
-	Description    string                `form:"description"`
-	File           *multipart.FileHeader `form:"file"`
-	PublisherId    string                `form:"publisherId"`
-	AgeRestriction int                   `form:"ageRestriction"`
-	ReleaseYear    int                   `form:"releaseYear"`
-	Genres         []string              `form:"genres"`
-	Platforms      []string              `form:"platforms"`
+func NewGame(publisherId uuid.UUID, title, description, imageLink string, ageRestriction, releaseYear int) Game {
+	return Game{
+		PublisherId:    publisherId,
+		Title:          title,
+		Description:    description,
+		ImageLink:      imageLink,
+		AgeRestriction: ageRestriction,
+		ReleaseYear:    releaseYear,
+	}
 }
 
 type Publisher struct {

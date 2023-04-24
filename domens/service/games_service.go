@@ -9,7 +9,9 @@ import (
 )
 
 type GameService struct {
-	GameRepo repository.IGameRepo
+	GameRepo             repository.IGameRepo
+	GenresOnGamesRepo    repository.IGenresOnGamesRepo
+	PlatformsOnGamesRepo repository.IPlatformsOnGamesRepo
 }
 
 var ErrParseId = errors.New("can't parse id")
@@ -22,7 +24,6 @@ func NewGameService(repo repository.IGameRepo) GameService {
 }
 
 func (g *GameService) GetGamesList() []models.Game {
-
 	games := g.GameRepo.GetGamesList()
 	return games
 }
@@ -42,37 +43,35 @@ func (g *GameService) GetGame(idStr string) (models.Game, error) {
 	return game, nil
 }
 
-func (g *GameService) CreateGame(inputGame models.InputGame, dst string, genres []models.Genre, plaforms []models.Platform) error {
-	publisherId, err := uuid.Parse(inputGame.PublisherId)
-	if err != nil {
-		return errors.New("can't parse publisherId id")
-	}
+func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plaforms []models.Platform) error {
 	gameId, err := uuid.NewRandom()
 	if err != nil {
 		return err
 	}
-	genresOnGames := make([]models.GenresOnGames, len(genres))
-	for i, genre := range genres {
-		genresOnGames[i] = models.GenresOnGames{
-			GameId:  gameId,
-			GenreId: genre.ID,
+	err = g.GameRepo.CreateGame(game)
+	if err != nil {
+		return err
+	}
+	for _, genre := range genres {
+		err := g.GenresOnGamesRepo.CreateGenresOnGames(
+			models.GenresOnGames{
+				GameId:  gameId,
+				GenreId: genre.ID,
+			})
+		if err != nil {
+			return err
 		}
 	}
-	platformsOnGames := make([]models.PlatformsOnGames, len(plaforms))
-	for i, plaform := range plaforms {
-		platformsOnGames[i] = models.PlatformsOnGames{
-			GameId:     gameId,
-			PlatformId: plaform.ID,
+	for _, plaform := range plaforms {
+		err := g.PlatformsOnGamesRepo.CreatePlatformsOnGames(
+			models.PlatformsOnGames{
+				GameId:     gameId,
+				PlatformId: plaform.ID,
+			})
+		if err != nil {
+			return err
 		}
 	}
-	game := models.Game{
-		ID:             gameId,
-		PublisherId:    publisherId,
-		Title:          inputGame.Title,
-		Description:    inputGame.Description,
-		ImageLink:      dst,
-		AgeRestriction: inputGame.AgeRestriction,
-		ReleaseYear:    inputGame.ReleaseYear,
-	}
-	return g.GameRepo.CreateGame(game)
+
+	return nil
 }

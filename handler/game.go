@@ -1,16 +1,30 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"game-library/domens/models"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 var ErrFileExists = gin.H{"error": "file with the name already exists"}
+
+type InputGame struct {
+	Title          string                `form:"title" binding:"required"`
+	Description    string                `form:"description"`
+	File           *multipart.FileHeader `form:"file"`
+	PublisherId    string                `form:"publisherId"`
+	AgeRestriction int                   `form:"ageRestriction"`
+	ReleaseYear    int                   `form:"releaseYear"`
+	Genres         []string              `form:"genres"`
+	Platforms      []string              `form:"platforms"`
+}
 
 func (g *GameHandler) GetGamesList(c *gin.Context) {
 	games := g.GameService.GetGamesList()
@@ -28,7 +42,7 @@ func (g *GameHandler) GetGame(c *gin.Context) {
 }
 
 func (g *GameHandler) UpdateGame(c *gin.Context) {
-	inputGame := models.InputGame{}
+	inputGame := InputGame{}
 	if err := c.ShouldBind(&inputGame); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
 		return
@@ -67,7 +81,7 @@ func (g *GameHandler) fromStringToPlatform(stringPlatform []string) ([]models.Pl
 }
 
 func (g *GameHandler) CreateGame(c *gin.Context) {
-	inputGame := models.InputGame{}
+	inputGame := InputGame{}
 	if err := c.ShouldBind(&inputGame); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -98,7 +112,13 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	err = g.GameService.CreateGame(inputGame, dst, genres, plaforms)
+	publisherId, err := uuid.Parse(inputGame.PublisherId)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, errors.New("can't parse publisherId id"))
+		return
+	}
+	game := models.NewGame(publisherId, inputGame.Title, inputGame.Description, dst, inputGame.AgeRestriction, inputGame.ReleaseYear)
+	err = g.GameService.CreateGame(game, genres, plaforms)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
