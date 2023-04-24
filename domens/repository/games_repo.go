@@ -15,7 +15,7 @@ var (
 
 type IGameRepo interface {
 	CreateGame(game models.Game) error
-	//GetGameById(id uuid.UUID) (*models.Game, error)
+	GetGameById(id uuid.UUID) (models.Game, error)
 	GetGamesList() []models.Game
 	//UpdateGame(id uuid.UUID, game models.Game) (models.Game, error)
 	//Delete(id uuid.UUID)
@@ -34,13 +34,20 @@ func NewGameRepo() *TestGameRepo {
 
 func (t *TestGameRepo) GetGamesList() []models.Game {
 	games := make([]models.Game, 0)
-	for _, user := range t.Games {
-		games = append(games, *user)
+	for _, game := range t.Games {
+		games = append(games, *game)
 	}
 	return games
 
 }
-
+func (t *TestGameRepo) GetGameById(id uuid.UUID) (models.Game, error) {
+	for _, game := range t.Games {
+		if game.ID == id {
+			return *game, nil
+		}
+	}
+	return models.Game{}, nil
+}
 func (t *TestGameRepo) CreateGame(game models.Game) error {
 	if err := t.checkIfExist(game); err != nil {
 		return err

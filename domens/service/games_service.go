@@ -12,6 +12,9 @@ type GameService struct {
 	GameRepo repository.IGameRepo
 }
 
+var ErrParseId = errors.New("can't parse id")
+var ErrUnknownId = errors.New("unknown id")
+
 func NewGameService(repo repository.IGameRepo) GameService {
 	return GameService{
 		GameRepo: repo,
@@ -19,8 +22,24 @@ func NewGameService(repo repository.IGameRepo) GameService {
 }
 
 func (g *GameService) GetGamesList() []models.Game {
+
 	games := g.GameRepo.GetGamesList()
 	return games
+}
+
+func (g *GameService) GetGame(idStr string) (models.Game, error) {
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return models.Game{}, ErrParseId
+	}
+	game, err := g.GameRepo.GetGameById(id)
+	if err != nil {
+		return models.Game{}, err
+	}
+	if game.ID == (uuid.UUID{}) {
+		return models.Game{}, ErrUnknownId
+	}
+	return game, nil
 }
 
 func (g *GameService) CreateGame(inputGame models.InputGame, dst string, genres []models.Genre, plaforms []models.Platform) error {

@@ -40,7 +40,7 @@ func SetupRouter() *gin.Engine {
 		users.GET("/:id", userHandler.GetUser)
 		users.GET("", userHandler.GetUsers)
 		{
-			users.Use(middleware.CheckPermissions(&userHandler))
+			users.Use(middleware.CheckIfAdmin(&userHandler))
 			users.PATCH("/:id", userHandler.ChangerRole)
 			users.DELETE("/:id", userHandler.DeleteUser)
 		}
@@ -50,7 +50,9 @@ func SetupRouter() *gin.Engine {
 	games := r.Group("/games")
 	{
 		games.GET("", gameHandler.GetGamesList)
-		games.POST("", gameHandler.CreateGame)
+		games.POST("", gameHandler.CreateGame).Use(middleware.CheckIfManager(&userHandler))
+		games.GET(":id", gameHandler.GetGame)
+		games.PATCH(":id").Use(middleware.CheckIfManager(&userHandler))
 	}
 
 	publisherHandler := handler.NewPublisherHandler(publisherService)
