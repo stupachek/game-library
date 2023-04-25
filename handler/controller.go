@@ -45,3 +45,15 @@ func NewPublisherHandler(service service.PublisherService) PublisherHandler {
 		PublisherService: service,
 	}
 }
+
+func NewPlatformHandler(service service.PlatformService) PlatformHandler {
+	return PlatformHandler{
+		PlatformService: service,
+	}
+}
+
+func NewGenreHandler(service service.GenreService) GenreHandler {
+	return GenreHandler{
+		GenreService: service,
+	}
+}

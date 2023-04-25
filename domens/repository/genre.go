@@ -9,11 +9,19 @@ import (
 
 type IGenreRepo interface {
 	GetGenre(name string) (models.Genre, error)
+	GetGenresList() []models.Genre
+	CreateGenre(genre models.Genre) models.Genre
 }
 
 type TestGenreRepo struct {
 	Genres map[uuid.UUID]*models.Genre
 	sync.Mutex
+}
+
+func NewGenreRepo() *TestGenreRepo {
+	return &TestGenreRepo{
+		Genres: make(map[uuid.UUID]*models.Genre),
+	}
 }
 
 func (t *TestGenreRepo) GetGenre(name string) (models.Genre, error) {
@@ -23,4 +31,18 @@ func (t *TestGenreRepo) GetGenre(name string) (models.Genre, error) {
 		}
 	}
 	return models.Genre{}, nil
+}
+
+func (t *TestGenreRepo) GetGenresList() []models.Genre {
+	genres := make([]models.Genre, 0)
+	for _, user := range t.Genres {
+		genres = append(genres, *user)
+	}
+	return genres
+
+}
+
+func (t *TestGenreRepo) CreateGenre(genre models.Genre) models.Genre {
+	t.Genres[genre.ID] = &genre
+	return genre
 }
