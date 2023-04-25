@@ -16,9 +16,13 @@ func SetupRouter() *gin.Engine {
 	userRepo := repository.NewUserRepo()
 	gameRepo := repository.NewGameRepo()
 	publisherRepo := repository.NewPublisherRepo()
+	platformRepo := repository.NewPlatformRepo()
+	genreRepo := repository.NewGenreRepo()
 	userService := service.NewUserService(userRepo)
 	gameService := service.NewGameService(gameRepo)
 	publisherService := service.NewPublisherService(publisherRepo)
+	platformService := service.NewPlatformService(platformRepo)
+	genreService := service.NewGenreService(genreRepo)
 	err := userService.SetupAdmin()
 	if err != nil {
 		log.Fatal(err)
@@ -67,6 +71,26 @@ func SetupRouter() *gin.Engine {
 			publishers.POST("", publisherHandler.CreatePublisher)
 			publishers.PATCH("/:id", publisherHandler.UpdatePublisher)
 			publishers.DELETE("/:id", publisherHandler.DeletePublisher)
+		}
+	}
+
+	platformHandler := handler.NewPlatformHandler(platformService)
+	platforms := r.Group("/platforms")
+	{
+		platforms.GET("", platformHandler.GetPlatformsList)
+		{
+			platforms.Use(middleware.Auth())
+			platforms.POST("", platformHandler.CreatePlatform)
+		}
+	}
+
+	genreHandler := handler.NewGenreHandler(genreService)
+	genres := r.Group("/genres")
+	{
+		genres.GET("", genreHandler.GetGenresList)
+		{
+			genres.Use(middleware.Auth())
+			genres.POST("", genreHandler.CreateGenre)
 		}
 	}
 	return r
