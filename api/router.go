@@ -57,6 +57,7 @@ func SetupRouter() *gin.Engine {
 		games.GET("", gameHandler.GetGamesList)
 		games.GET(":id", gameHandler.GetGame)
 		games.Use(middleware.CheckIfManager(&userHandler))
+		games.Use(middleware.DeleteFile(&gameHandler))
 		games.POST("", gameHandler.CreateGame)
 		games.PATCH(":id")
 	}
