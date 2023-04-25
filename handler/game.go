@@ -99,28 +99,28 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 	}
 	c.Set("dst", dst)
 	if _, err := g.PublisherService.GetPublisher(inputGame.PublisherId); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 	genres, err := g.fromStringToGenres(inputGame.Genres)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 	plaforms, err := g.fromStringToPlatform(inputGame.Platforms)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 	publisherId, err := uuid.Parse(inputGame.PublisherId)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, errors.New("can't parse publisherId id"))
+		_ = c.AbortWithError(http.StatusBadRequest, errors.New("can't parse publisherId id"))
 		return
 	}
 	game := models.NewGame(publisherId, inputGame.Title, inputGame.Description, dst, inputGame.AgeRestriction, inputGame.ReleaseYear)
 	err = g.GameService.CreateGame(game, genres, plaforms)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully created", "data": gin.H{"link": dst}})
