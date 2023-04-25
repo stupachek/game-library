@@ -18,8 +18,8 @@ var ErrFileExists = gin.H{"error": "file with the name already exists"}
 type InputGame struct {
 	Title          string                `form:"title" binding:"required"`
 	Description    string                `form:"description"`
-	File           *multipart.FileHeader `form:"file"`
-	PublisherId    string                `form:"publisherId"`
+	File           *multipart.FileHeader `form:"file" binding:"required"`
+	PublisherId    string                `form:"publisherId" binding:"required"`
 	AgeRestriction int                   `form:"ageRestriction"`
 	ReleaseYear    int                   `form:"releaseYear"`
 	Genres         []string              `form:"genres"`
