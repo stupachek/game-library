@@ -25,6 +25,9 @@ go run .
 ## Usage
 The HTTP server runs on localhost:8081
 
+## ER Diagram
+![alt text](readme-imgs/er-diagram.jpeg)
+
 ## Endpoints 
 The majority of methods expect a body with JSON value. Exclusion is createGame. The endpoint uses form data. 
 
