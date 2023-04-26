@@ -59,7 +59,6 @@ func SetupRouter() *gin.Engine {
 		games.Use(middleware.CheckIfManager(&userHandler))
 		games.Use(middleware.DeleteFile(&gameHandler))
 		games.POST("", gameHandler.CreateGame)
-		games.PATCH(":id")
 	}
 
 	publisherHandler := handler.NewPublisherHandler(publisherService)

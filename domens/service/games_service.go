@@ -48,6 +48,7 @@ func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plafor
 	if err != nil {
 		return err
 	}
+	game.ID = gameId
 	err = g.GameRepo.CreateGame(game)
 	if err != nil {
 		return err
