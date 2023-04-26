@@ -17,6 +17,7 @@ Game Library is an application where users can find information about games they
 - manager (can add/delete/edit games and all relevant information)
 - admin (manages user roles)
 
+
 ## Run
 ```
 go run . 
@@ -504,4 +505,3 @@ Body
     ]
 }
 ```
-
