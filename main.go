@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"game-library/api"
+	"log"
+	"net/http"
+)
 
 func main() {
-	fmt.Println("Hello world")
+	app := api.SetupRouter()
+	err := http.ListenAndServe(":8081", app)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
