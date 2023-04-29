@@ -7,12 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type IGenreRepo interface {
-	GetGenre(name string) (models.Genre, error)
-	GetGenresList() []models.Genre
-	CreateGenre(genre models.Genre) models.Genre
-}
-
 type TestGenreRepo struct {
 	Genres map[uuid.UUID]*models.Genre
 	sync.Mutex

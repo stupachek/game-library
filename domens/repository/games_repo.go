@@ -13,14 +13,6 @@ var (
 	ErrDublicateGameID error = errors.New("game with the ID is already exist")
 )
 
-type IGameRepo interface {
-	CreateGame(game models.Game) error
-	GetGameById(id uuid.UUID) (models.Game, error)
-	GetGamesList() []models.Game
-	//UpdateGame(id uuid.UUID, game models.Game) (models.Game, error)
-	//Delete(id uuid.UUID)
-}
-
 type TestGameRepo struct {
 	Games map[uuid.UUID]*models.Game
 	sync.Mutex
