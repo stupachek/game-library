@@ -3,21 +3,50 @@ package service
 import (
 	"errors"
 	"game-library/domens/models"
-	"game-library/domens/repository"
 
 	"github.com/google/uuid"
 )
 
 type GameService struct {
-	GameRepo             repository.IGameRepo
-	GenresOnGamesRepo    repository.IGenresOnGamesRepo
-	PlatformsOnGamesRepo repository.IPlatformsOnGamesRepo
+	GameRepo             IGameRepo
+	GenresOnGamesRepo    IGenresOnGamesRepo
+	PlatformsOnGamesRepo IPlatformsOnGamesRepo
+}
+
+type IGameRepo interface {
+	CreateGame(game models.Game) error
+	GetGameById(id uuid.UUID) (models.Game, error)
+	GetGamesList() []models.Game
+	//UpdateGame(id uuid.UUID, game models.Game) (models.Game, error)
+	//Delete(id uuid.UUID)
+}
+
+type IGenreRepo interface {
+	GetGenre(name string) (models.Genre, error)
+	GetGenresList() []models.Genre
+	CreateGenre(genre models.Genre) models.Genre
+}
+
+type IGenresOnGamesRepo interface {
+	CreateGenresOnGames(genresOnGames models.GenresOnGames) error
+}
+
+type IPlatformsOnGamesRepo interface {
+	CreatePlatformsOnGames(PlatformsOnGames models.PlatformsOnGames) error
+}
+
+type IPublisherRepo interface {
+	GetPublishersList() []models.Publisher
+	CreatePublisher(publisher models.Publisher) models.Publisher
+	UpdatePublisher(id uuid.UUID, publisher models.PublisherModel) (models.Publisher, error)
+	GetPublisherById(id uuid.UUID) (*models.Publisher, error)
+	Delete(id uuid.UUID)
 }
 
 var ErrParseId = errors.New("can't parse id")
 var ErrUnknownId = errors.New("unknown id")
 
-func NewGameService(repo repository.IGameRepo) GameService {
+func NewGameService(repo IGameRepo) GameService {
 	return GameService{
 		GameRepo: repo,
 	}

@@ -3,7 +3,7 @@ package service
 import (
 	"errors"
 	"game-library/domens/models"
-	"game-library/domens/repository"
+
 	"github.com/google/uuid"
 )
 
@@ -12,10 +12,10 @@ var (
 )
 
 type PublisherService struct {
-	PublisherRepo repository.IPublisherRepo
+	PublisherRepo IPublisherRepo
 }
 
-func NewPublisherService(repo repository.IPublisherRepo) PublisherService {
+func NewPublisherService(repo IPublisherRepo) PublisherService {
 	return PublisherService{
 		PublisherRepo: repo,
 	}

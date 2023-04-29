@@ -12,14 +12,6 @@ var (
 	ErrPublisherNotFound = errors.New("publisher does not exist")
 )
 
-type IPublisherRepo interface {
-	GetPublishersList() []models.Publisher
-	CreatePublisher(publisher models.Publisher) models.Publisher
-	UpdatePublisher(id uuid.UUID, publisher models.PublisherModel) (models.Publisher, error)
-	GetPublisherById(id uuid.UUID) (*models.Publisher, error)
-	Delete(id uuid.UUID)
-}
-
 type TestPublisherRepo struct {
 	Publishers map[uuid.UUID]*models.Publisher
 	sync.Mutex

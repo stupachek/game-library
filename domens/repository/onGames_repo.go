@@ -7,10 +7,6 @@ import (
 
 var ErrDublicateIDModel error = errors.New("model with the ID already exist")
 
-type IGenresOnGamesRepo interface {
-	CreateGenresOnGames(genresOnGames models.GenresOnGames) error
-}
-
 type TestGenresOnGamesRepo struct {
 	GenresOnGames map[uint]*models.GenresOnGames
 }
@@ -21,10 +17,6 @@ func (t *TestGenresOnGamesRepo) CreateGenresOnGames(genresOnGames models.GenresO
 	}
 	t.GenresOnGames[genresOnGames.ID] = &genresOnGames
 	return nil
-}
-
-type IPlatformsOnGamesRepo interface {
-	CreatePlatformsOnGames(PlatformsOnGames models.PlatformsOnGames) error
 }
 
 type TestPlatformsOnGamesRepo struct {

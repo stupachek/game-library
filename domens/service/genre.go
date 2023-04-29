@@ -3,16 +3,15 @@ package service
 import (
 	"fmt"
 	"game-library/domens/models"
-	"game-library/domens/repository"
 
 	"github.com/google/uuid"
 )
 
 type GenreService struct {
-	GenreRepo repository.IGenreRepo
+	GenreRepo IGenreRepo
 }
 
-func NewGenreService(repo repository.IGenreRepo) GenreService {
+func NewGenreService(repo IGenreRepo) GenreService {
 	return GenreService{
 		GenreRepo: repo,
 	}
