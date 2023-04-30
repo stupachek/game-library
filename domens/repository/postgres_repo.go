@@ -54,8 +54,5 @@ func ConnectDataBase() *sql.DB {
 	} else {
 		log.Println("We are connected to the database ", Dbdriver)
 	}
-
-	defer DB.Close()
-	fmt.Println("Welcome!")
 	return DB
 }

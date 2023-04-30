@@ -98,9 +98,12 @@ func (u *UserService) DeleteUser(idStr string) error {
 	return nil
 }
 
-func (u *UserService) GetUsers() []models.User {
-	users := u.UserRepo.GetUsers()
-	return users
+func (u *UserService) GetUsers() ([]models.User, error) {
+	users, err := u.UserRepo.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (u *UserService) ChangeRole(idStr string, role string) (models.User, error) {
@@ -111,10 +114,14 @@ func (u *UserService) ChangeRole(idStr string, role string) (models.User, error)
 	var user models.User
 	switch role {
 	case models.USER, models.ADMIN, models.MANAGER:
-		user, err = u.UserRepo.UpdateRole(id, role)
+		if err := u.UserRepo.UpdateRole(id, role); err != nil {
+			return models.User{}, err
+		}
+		userP, err := u.UserRepo.GetUserById(id)
 		if err != nil {
 			return models.User{}, err
 		}
+		user = *userP
 	default:
 		return models.User{}, errors.New("unknown role")
 	}

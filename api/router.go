@@ -13,7 +13,13 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	userRepo := repository.NewUserRepo()
+	//TODO: move init repo and servise to main
+	DB := repository.ConnectDataBase()
+	userRepo := repository.NewPostgresUserRepo(DB)
+	err := userRepo.Migrate()
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
 	gameRepo := repository.NewGameRepo()
 	publisherRepo := repository.NewPublisherRepo()
 	platformRepo := repository.NewPlatformRepo()
@@ -23,10 +29,6 @@ func SetupRouter() *gin.Engine {
 	publisherService := service.NewPublisherService(publisherRepo)
 	platformService := service.NewPlatformService(platformRepo)
 	genreService := service.NewGenreService(genreRepo)
-	err := userService.SetupAdmin()
-	if err != nil {
-		log.Fatal(err)
-	}
 	service.Public, service.Private, err = ed25519.GenerateKey(nil)
 	if err != nil {
 		log.Fatal(err)
