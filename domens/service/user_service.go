@@ -94,8 +94,7 @@ func (u *UserService) DeleteUser(idStr string) error {
 	if _, err := u.UserRepo.GetUserById(id); err != nil {
 		return err
 	}
-	u.UserRepo.Delete(id)
-	return nil
+	return u.UserRepo.Delete(id)
 }
 
 func (u *UserService) GetUsers() ([]models.User, error) {
