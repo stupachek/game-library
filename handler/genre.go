@@ -2,8 +2,9 @@ package handler
 
 import (
 	"game-library/domens/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (g *GenreHandler) CreateGenre(c *gin.Context) {
@@ -12,7 +13,11 @@ func (g *GenreHandler) CreateGenre(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
 		return
 	}
-	createdGenre := g.GenreService.CreateGenre(genre)
+	createdGenre, err := g.GenreService.CreateGenre(genre)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Genre is successfully created", "data": createdGenre})
 }
 

@@ -3,6 +3,7 @@ package service
 import (
 	"game-library/domens/models"
 	"game-library/domens/repository"
+
 	"github.com/google/uuid"
 )
 
@@ -25,12 +26,12 @@ func (p *PlatformService) GetPlatformsList() []models.Platform {
 	return platforms
 }
 
-func (p *PlatformService) CreatePlatform(platformModel models.Platform) models.Platform {
+func (p *PlatformService) CreatePlatform(platformModel models.Platform) (models.Platform, error) {
 	id, _ := uuid.NewRandom()
 	platform := models.Platform{
 		ID:   id,
 		Name: platformModel.Name,
 	}
-	createdPlatform := p.PlatformRepo.CreatePlatform(platform)
-	return createdPlatform
+	err := p.PlatformRepo.CreatePlatform(platform)
+	return platform, err
 }

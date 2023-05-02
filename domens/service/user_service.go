@@ -4,6 +4,8 @@ import (
 	"errors"
 	"game-library/domens/models"
 	"game-library/domens/repository"
+	"log"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/matthewhartstonge/argon2"
@@ -25,13 +27,25 @@ func NewUserService(repo repository.IUserRepo) UserService {
 }
 
 func (u *UserService) SetupAdmin() error {
-	hashedPassword, err := newPassword("admin")
+	ADMIN_EMAIL, ok := os.LookupEnv("ADMIN_EMAIL")
+	if !ok {
+		log.Fatal("please specify ADMIN_EMAIL")
+	}
+	ADMIN_USERNAME, ok := os.LookupEnv("ADMIN_USERNAME")
+	if !ok {
+		log.Fatal("please specify ADMIN_USERNAME")
+	}
+	ADMIN_PASSWORD, ok := os.LookupEnv("ADMIN_PASSWORD")
+	if !ok {
+		log.Fatal("please specify ADMIN_PASSWORD")
+	}
+	hashedPassword, err := newPassword(ADMIN_PASSWORD)
 	if err != nil {
 		return ErrAdmin
 	}
 	user := models.User{
-		Email:          "admin@a.a",
-		Username:       "admin",
+		Email:          ADMIN_EMAIL,
+		Username:       ADMIN_USERNAME,
 		HashedPassword: hashedPassword,
 		Role:           models.ADMIN,
 	}
@@ -39,7 +53,7 @@ func (u *UserService) SetupAdmin() error {
 	if err != nil {
 		return ErrAdmin
 	}
-	err = u.UserRepo.CreateUser(user)
+	err = u.UserRepo.CreateAdmin(user)
 	return err
 }
 

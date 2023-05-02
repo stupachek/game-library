@@ -27,7 +27,11 @@ type InputGame struct {
 }
 
 func (g *GameHandler) GetGamesList(c *gin.Context) {
-	games := g.GameService.GetGamesList()
+	games, err := g.GameService.GetGamesList()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": games})
 }
 

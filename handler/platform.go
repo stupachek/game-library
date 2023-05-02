@@ -2,8 +2,9 @@ package handler
 
 import (
 	"game-library/domens/models"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (p *PlatformHandler) CreatePlatform(c *gin.Context) {
@@ -12,7 +13,11 @@ func (p *PlatformHandler) CreatePlatform(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
 		return
 	}
-	createdPlatform := p.PlatformService.CreatePlatform(platform)
+	createdPlatform, err := p.PlatformService.CreatePlatform(platform)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Platform is successfully created", "data": createdPlatform})
 }
 

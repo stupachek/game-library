@@ -16,19 +16,39 @@ func SetupRouter() *gin.Engine {
 	//TODO: move init repo and servise to main
 	DB := repository.ConnectDataBase()
 	userRepo := repository.NewPostgresUserRepo(DB)
-	err := userRepo.Migrate()
-	if err != nil {
+	if err := userRepo.Migrate(); err != nil {
 		log.Fatalf("%v", err)
 	}
-	gameRepo := repository.NewGameRepo()
+	gameRepo := repository.NewPostgresGameRepo(DB)
+	if err := gameRepo.Migrate(); err != nil {
+		log.Fatalf("%v", err)
+	}
 	publisherRepo := repository.NewPublisherRepo()
-	platformRepo := repository.NewPlatformRepo()
-	genreRepo := repository.NewGenreRepo()
+	platformRepo := repository.NewPostgresPlatformRepo(DB)
+	if err := platformRepo.Migrate(); err != nil {
+		log.Fatalf("%v", err)
+	}
+	genreRepo := repository.NewPostgresGenreRepo(DB)
+	if err := genreRepo.Migrate(); err != nil {
+		log.Fatalf("%v", err)
+	}
+	genreOnGameRepo := repository.NewPostgresGenresOnGamesRepo(DB)
+	if err := genreOnGameRepo.Migrate(); err != nil {
+		log.Fatalf("%v", err)
+	}
+	platformOnGameRepo := repository.NewPostgresPlatformsOnGamesRepo(DB)
+	if err := platformOnGameRepo.Migrate(); err != nil {
+		log.Fatalf("%v", err)
+	}
 	userService := service.NewUserService(userRepo)
-	gameService := service.NewGameService(gameRepo)
+	gameService := service.NewGameService(gameRepo, genreOnGameRepo, platformOnGameRepo)
 	publisherService := service.NewPublisherService(publisherRepo)
 	platformService := service.NewPlatformService(platformRepo)
 	genreService := service.NewGenreService(genreRepo)
+	err := userService.SetupAdmin()
+	if err != nil {
+		log.Fatal(err)
+	}
 	service.Public, service.Private, err = ed25519.GenerateKey(nil)
 	if err != nil {
 		log.Fatal(err)

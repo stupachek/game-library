@@ -33,12 +33,12 @@ func (g *GenreService) GetGenresList() []models.Genre {
 	return genres
 }
 
-func (g *GenreService) CreateGenre(genreModel models.Genre) models.Genre {
+func (g *GenreService) CreateGenre(genreModel models.Genre) (models.Genre, error) {
 	id, _ := uuid.NewRandom()
 	genre := models.Genre{
 		ID:   id,
 		Name: genreModel.Name,
 	}
-	createdGenre := g.GenreRepo.CreateGenre(genre)
-	return createdGenre
+	err := g.GenreRepo.CreateGenre(genre)
+	return genre, err
 }
