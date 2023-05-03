@@ -21,9 +21,8 @@ func (p *PlatformService) GetPlatform(name string) (models.Platform, error) {
 	return p.PlatformRepo.GetPlatform(name)
 }
 
-func (p *PlatformService) GetPlatformsList() []models.Platform {
-	platforms := p.PlatformRepo.GetPlatformsList()
-	return platforms
+func (p *PlatformService) GetPlatformsList() ([]models.Platform, error) {
+	return p.PlatformRepo.GetPlatformsList()
 }
 
 func (p *PlatformService) CreatePlatform(platformModel models.Platform) (models.Platform, error) {

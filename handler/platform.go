@@ -22,6 +22,10 @@ func (p *PlatformHandler) CreatePlatform(c *gin.Context) {
 }
 
 func (p *PlatformHandler) GetPlatformsList(c *gin.Context) {
-	platforms := p.PlatformService.GetPlatformsList()
+	platforms, err := p.PlatformService.GetPlatformsList()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": platforms})
 }

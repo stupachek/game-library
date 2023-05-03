@@ -22,6 +22,10 @@ func (g *GenreHandler) CreateGenre(c *gin.Context) {
 }
 
 func (g *GenreHandler) GetGenresList(c *gin.Context) {
-	genres := g.GenreService.GetGenresList()
+	genres, err := g.GenreService.GetGenresList()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": genres})
 }

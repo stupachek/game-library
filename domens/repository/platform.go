@@ -12,7 +12,7 @@ import (
 
 type IPlatformRepo interface {
 	GetPlatform(name string) (models.Platform, error)
-	GetPlatformsList() []models.Platform
+	GetPlatformsList() ([]models.Platform, error)
 	CreatePlatform(platform models.Platform) error
 }
 
@@ -49,7 +49,12 @@ func (p *PostgresPlatformRepo) Migrate() error {
 }
 
 func (p *PostgresPlatformRepo) GetPlatform(name string) (models.Platform, error) {
-	return models.Platform{}, nil
+	row := p.DB.QueryRow("SELECT id, name FROM platforms WHERE name = $1", name)
+	var platform models.Platform
+	if err := row.Scan(&platform.ID, &platform.Name); err != nil {
+		return models.Platform{}, err
+	}
+	return platform, nil
 }
 
 func (t *TestPlatformRepo) GetPlatform(name string) (models.Platform, error) {
@@ -61,17 +66,30 @@ func (t *TestPlatformRepo) GetPlatform(name string) (models.Platform, error) {
 	return models.Platform{}, ErrDublicateEmail
 }
 
-func (t *TestPlatformRepo) GetPlatformsList() []models.Platform {
+func (t *TestPlatformRepo) GetPlatformsList() ([]models.Platform, error) {
 	platforms := make([]models.Platform, 0)
 	for _, user := range t.Platforms {
 		platforms = append(platforms, *user)
 	}
-	return platforms
+	return platforms, nil
 
 }
 
-func (p *PostgresPlatformRepo) GetPlatformsList() []models.Platform {
-	return []models.Platform{}
+func (p *PostgresPlatformRepo) GetPlatformsList() ([]models.Platform, error) {
+	rows, err := p.DB.Query("SELECT id, name FROM platforms")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var platforms []models.Platform
+	for rows.Next() {
+		var platform models.Platform
+		if err := rows.Scan(&platform.ID, &platform.Name); err != nil {
+			return nil, err
+		}
+		platforms = append(platforms, platform)
+	}
+	return platforms, nil
 
 }
 

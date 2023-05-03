@@ -23,7 +23,7 @@ type IGameRepo interface {
 
 type IGenreRepo interface {
 	GetGenre(name string) (models.Genre, error)
-	GetGenresList() []models.Genre
+	GetGenresList() ([]models.Genre, error)
 	CreateGenre(genre models.Genre) error
 }
 

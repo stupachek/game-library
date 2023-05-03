@@ -49,9 +49,13 @@ func (t *TestGenreRepo) GetGenre(name string) (models.Genre, error) {
 	return models.Genre{}, nil
 }
 
-// TODO
 func (p *PostgresGenreRepo) GetGenre(name string) (models.Genre, error) {
-	return models.Genre{}, nil
+	row := p.DB.QueryRow("SELECT id, name FROM genres WHERE name = $1", name)
+	var genre models.Genre
+	if err := row.Scan(&genre.ID, &genre.Name); err != nil {
+		return models.Genre{}, err
+	}
+	return genre, nil
 }
 
 func (t *TestGenreRepo) GetGenresList() []models.Genre {
@@ -63,9 +67,21 @@ func (t *TestGenreRepo) GetGenresList() []models.Genre {
 
 }
 
-// TODO
-func (p *PostgresGenreRepo) GetGenresList() []models.Genre {
-	return []models.Genre{}
+func (p *PostgresGenreRepo) GetGenresList() ([]models.Genre, error) {
+	rows, err := p.DB.Query("SELECT id, name FROM genres")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var genres []models.Genre
+	for rows.Next() {
+		var genre models.Genre
+		if err := rows.Scan(&genre.ID, &genre.Name); err != nil {
+			return nil, err
+		}
+		genres = append(genres, genre)
+	}
+	return genres, nil
 }
 
 func (t *TestGenreRepo) CreateGenre(genre models.Genre) error {

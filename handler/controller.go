@@ -33,10 +33,12 @@ func NewUserHadler(service service.UserService) UserHandler {
 	}
 }
 
-func NewGameHandler(serviceG service.GameService, serviceP service.PublisherService) GameHandler {
+func NewGameHandler(game service.GameService, publisher service.PublisherService, genre service.GenreService, platform service.PlatformService) GameHandler {
 	return GameHandler{
-		GameService:      serviceG,
-		PublisherService: serviceP,
+		GameService:      game,
+		PublisherService: publisher,
+		GenreService:     genre,
+		PlatformService:  platform,
 	}
 }
 

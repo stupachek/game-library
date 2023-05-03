@@ -28,9 +28,8 @@ func (g *GenreService) GetGenre(name string) (models.Genre, error) {
 	return genre, nil
 }
 
-func (g *GenreService) GetGenresList() []models.Genre {
-	genres := g.GenreRepo.GetGenresList()
-	return genres
+func (g *GenreService) GetGenresList() ([]models.Genre, error) {
+	return g.GenreRepo.GetGenresList()
 }
 
 func (g *GenreService) CreateGenre(genreModel models.Genre) (models.Genre, error) {

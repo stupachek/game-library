@@ -51,7 +51,7 @@ func SetupRouter() *gin.Engine {
 		}
 	}
 
-	gameHandler := handler.NewGameHandler(gameService, publisherService)
+	gameHandler := handler.NewGameHandler(gameService, publisherService, genreService, platformService)
 	games := r.Group("/games")
 	games.Use(middleware.Auth())
 	{
