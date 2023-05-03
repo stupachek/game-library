@@ -71,6 +71,5 @@ func (p *PublisherService) DeletePublisher(idStr string) error {
 	if _, err := p.PublisherRepo.GetPublisherById(id); err != nil {
 		return err
 	}
-	p.PublisherRepo.Delete(id)
-	return nil
+	return p.PublisherRepo.Delete(id)
 }
