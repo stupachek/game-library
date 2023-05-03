@@ -36,11 +36,11 @@ type IPlatformsOnGamesRepo interface {
 }
 
 type IPublisherRepo interface {
-	GetPublishersList() []models.Publisher
-	CreatePublisher(publisher models.Publisher) models.Publisher
-	UpdatePublisher(id uuid.UUID, publisher models.PublisherModel) (models.Publisher, error)
+	GetPublishersList() ([]models.Publisher, error)
+	CreatePublisher(pub models.Publisher) error
 	GetPublisherById(id uuid.UUID) (*models.Publisher, error)
-	Delete(id uuid.UUID)
+	UpdatePublisher(id uuid.UUID, publisher models.PublisherModel) error
+	Delete(id uuid.UUID) error
 }
 
 var ErrParseId = errors.New("can't parse id")

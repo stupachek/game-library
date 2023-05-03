@@ -41,3 +41,10 @@ CREATE TABLE IF NOT EXISTS platformsOnGames(
 		gameId UUID REFERENCES games(id),
 		platformId UUID REFERENCES platforms(id)
     );
+
+CREATE TABLE IF NOT EXISTS publishers(
+    id UUID PRIMARY KEY,
+    name VARCHAR NOT NULL UNIQUE
+);
+
+ALTER TABLE games ADD CONSTRAINT publisher_fk FOREIGN KEY (publisherId) REFERENCES publishers (id);

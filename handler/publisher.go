@@ -7,7 +7,13 @@ import (
 )
 
 func (p *PublisherHandler) GetPlatformsList(c *gin.Context) {
-	publishers := p.PublisherService.GetPublishersList()
+	publishers, err := p.PublisherService.GetPublishersList()
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"data": publishers})
 }
 
@@ -17,7 +23,13 @@ func (p *PublisherHandler) CreatePublisher(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
 		return
 	}
-	createdPublisher := p.PublisherService.CreatePublisher(publisher)
+	createdPublisher, err := p.PublisherService.CreatePublisher(publisher)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Publisher is successfully created", "data": createdPublisher})
 }
 

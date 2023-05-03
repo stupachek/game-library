@@ -102,10 +102,10 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		return
 	}
 	c.Set("dst", dst)
-	if _, err := g.PublisherService.GetPublisher(inputGame.PublisherId); err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
+	//if _, err := g.PublisherService.GetPublisher(inputGame.PublisherId); err != nil {
+	//	_ = c.AbortWithError(http.StatusBadRequest, err)
+	//	return
+	//}
 	genres, err := g.fromStringToGenres(inputGame.Genres)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)

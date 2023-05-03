@@ -17,7 +17,7 @@ func SetupRouter() *gin.Engine {
 	DB := repository.ConnectDataBase()
 	userRepo := repository.NewPostgresUserRepo(DB)
 	gameRepo := repository.NewPostgresGameRepo(DB)
-	publisherRepo := repository.NewPublisherRepo()
+	publisherRepo := repository.NewPostgresPublisherRepo(DB)
 	platformRepo := repository.NewPostgresPlatformRepo(DB)
 	genreRepo := repository.NewPostgresGenreRepo(DB)
 	genreOnGameRepo := repository.NewPostgresGenresOnGamesRepo(DB)

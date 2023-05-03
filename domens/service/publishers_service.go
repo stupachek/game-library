@@ -21,19 +21,18 @@ func NewPublisherService(repo IPublisherRepo) PublisherService {
 	}
 }
 
-func (p *PublisherService) GetPublishersList() []models.Publisher {
-	publishers := p.PublisherRepo.GetPublishersList()
-	return publishers
+func (p *PublisherService) GetPublishersList() ([]models.Publisher, error) {
+	return p.PublisherRepo.GetPublishersList()
 }
 
-func (p *PublisherService) CreatePublisher(platformModel models.PublisherModel) models.Publisher {
+func (p *PublisherService) CreatePublisher(publisherModel models.PublisherModel) (models.Publisher, error) {
 	id, _ := uuid.NewRandom()
 	publisher := models.Publisher{
 		ID:   id,
-		Name: platformModel.Name,
+		Name: publisherModel.Name,
 	}
-	createdPublisher := p.PublisherRepo.CreatePublisher(publisher)
-	return createdPublisher
+	err := p.PublisherRepo.CreatePublisher(publisher)
+	return publisher, err
 }
 
 func (p *PublisherService) UpdatePublisher(idStr string, publisherModel models.PublisherModel) (models.Publisher, error) {
@@ -41,9 +40,13 @@ func (p *PublisherService) UpdatePublisher(idStr string, publisherModel models.P
 	if err != nil {
 		return models.Publisher{}, errors.New("can't parse publisher id")
 	}
-	publisher, err := p.PublisherRepo.UpdatePublisher(id, publisherModel)
+	err = p.PublisherRepo.UpdatePublisher(id, publisherModel)
 	if err != nil {
 		return models.Publisher{}, err
+	}
+	publisher := models.Publisher{
+		ID:   id,
+		Name: publisherModel.Name,
 	}
 	return publisher, nil
 }
