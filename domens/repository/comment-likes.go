@@ -3,14 +3,10 @@ package repository
 import (
 	"database/sql"
 	"game-library/domens/models"
-	"github.com/google/uuid"
 	"sync"
-)
 
-type ICommentLikesRepo interface {
-	CreateCommentLike(comment models.CommentLike) error
-	Delete(id uuid.UUID) error
-}
+	"github.com/google/uuid"
+)
 
 type TestCommentLikesRepo struct {
 	CommentLikes map[uuid.UUID]*models.CommentLike

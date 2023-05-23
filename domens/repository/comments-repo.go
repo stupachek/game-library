@@ -3,14 +3,10 @@ package repository
 import (
 	"database/sql"
 	"game-library/domens/models"
-	"github.com/google/uuid"
 	"sync"
-)
 
-type ICommentRepo interface {
-	CreateComment(comment models.Comment) error
-	Delete(id uuid.UUID) error
-}
+	"github.com/google/uuid"
+)
 
 type TestCommentRepo struct {
 	Comments map[uuid.UUID]*models.Comment
