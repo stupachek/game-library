@@ -8,7 +8,7 @@ import (
 
 func main() {
 	app := api.SetupRouter()
-	err := http.ListenAndServe(":8081", app)
+	err := http.ListenAndServe(":8080", app)
 	if err != nil {
 		log.Fatal(err)
 	}

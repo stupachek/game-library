@@ -27,7 +27,11 @@ type InputGame struct {
 }
 
 func (g *GameHandler) GetGamesList(c *gin.Context) {
-	games := g.GameService.GetGamesList()
+	games, err := g.GameService.GetGamesList()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": games})
 }
 
@@ -98,10 +102,10 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		return
 	}
 	c.Set("dst", dst)
-	if _, err := g.PublisherService.GetPublisher(inputGame.PublisherId); err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
+	//if _, err := g.PublisherService.GetPublisher(inputGame.PublisherId); err != nil {
+	//	_ = c.AbortWithError(http.StatusBadRequest, err)
+	//	return
+	//}
 	genres, err := g.fromStringToGenres(inputGame.Genres)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)

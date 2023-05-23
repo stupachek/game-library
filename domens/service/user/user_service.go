@@ -1,9 +1,12 @@
-package service
+package user
 
 import (
 	"errors"
 	"game-library/domens/models"
-	"game-library/domens/repository"
+	repository "game-library/domens/repository/user_repo"
+	"game-library/domens/service/jwt"
+	"log"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/matthewhartstonge/argon2"
@@ -25,13 +28,25 @@ func NewUserService(repo repository.IUserRepo) UserService {
 }
 
 func (u *UserService) SetupAdmin() error {
-	hashedPassword, err := newPassword("admin")
+	ADMIN_EMAIL, ok := os.LookupEnv("ADMIN_EMAIL")
+	if !ok {
+		log.Fatal("please specify ADMIN_EMAIL")
+	}
+	ADMIN_USERNAME, ok := os.LookupEnv("ADMIN_USERNAME")
+	if !ok {
+		log.Fatal("please specify ADMIN_USERNAME")
+	}
+	ADMIN_PASSWORD, ok := os.LookupEnv("ADMIN_PASSWORD")
+	if !ok {
+		log.Fatal("please specify ADMIN_PASSWORD")
+	}
+	hashedPassword, err := newPassword(ADMIN_PASSWORD)
 	if err != nil {
 		return ErrAdmin
 	}
 	user := models.User{
-		Email:          "admin@a.a",
-		Username:       "admin",
+		Email:          ADMIN_EMAIL,
+		Username:       ADMIN_USERNAME,
 		HashedPassword: hashedPassword,
 		Role:           models.ADMIN,
 	}
@@ -39,7 +54,7 @@ func (u *UserService) SetupAdmin() error {
 	if err != nil {
 		return ErrAdmin
 	}
-	err = u.UserRepo.CreateUser(user)
+	err = u.UserRepo.CreateAdmin(user)
 	return err
 }
 
@@ -71,7 +86,7 @@ func (u *UserService) Login(loginUser models.LoginModel) (string, error) {
 	if err != nil || !ok {
 		return "", ErrUnauthenticated
 	}
-	return NewJWT(user.ID.String())
+	return jwt.NewJWT(user.ID.String())
 }
 
 func (u *UserService) GetUser(idStr string) (models.User, error) {
@@ -94,13 +109,15 @@ func (u *UserService) DeleteUser(idStr string) error {
 	if _, err := u.UserRepo.GetUserById(id); err != nil {
 		return err
 	}
-	u.UserRepo.Delete(id)
-	return nil
+	return u.UserRepo.Delete(id)
 }
 
-func (u *UserService) GetUsers() []models.User {
-	users := u.UserRepo.GetUsers()
-	return users
+func (u *UserService) GetUsers() ([]models.User, error) {
+	users, err := u.UserRepo.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (u *UserService) ChangeRole(idStr string, role string) (models.User, error) {
@@ -111,10 +128,14 @@ func (u *UserService) ChangeRole(idStr string, role string) (models.User, error)
 	var user models.User
 	switch role {
 	case models.USER, models.ADMIN, models.MANAGER:
-		user, err = u.UserRepo.UpdateRole(id, role)
+		if err := u.UserRepo.UpdateRole(id, role); err != nil {
+			return models.User{}, err
+		}
+		userP, err := u.UserRepo.GetUserById(id)
 		if err != nil {
 			return models.User{}, err
 		}
+		user = *userP
 	default:
 		return models.User{}, errors.New("unknown role")
 	}

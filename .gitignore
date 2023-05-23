@@ -26,3 +26,5 @@ go.work
 
 # system file
 .DS_Store
+library
+docker-compose-demo.yml

@@ -2,8 +2,18 @@ package api
 
 import (
 	"crypto/ed25519"
-	"game-library/domens/repository"
-	"game-library/domens/service"
+	"game-library/domens/repository/database"
+	"game-library/domens/repository/game_repo"
+	"game-library/domens/repository/genre_repo"
+	"game-library/domens/repository/platform_repo"
+	"game-library/domens/repository/publisher_repo"
+	"game-library/domens/repository/user_repo"
+	"game-library/domens/service/game"
+	"game-library/domens/service/genre"
+	"game-library/domens/service/jwt"
+	"game-library/domens/service/platform"
+	"game-library/domens/service/publisher"
+	"game-library/domens/service/user"
 	"game-library/handler"
 	"game-library/middleware"
 	"log"
@@ -13,21 +23,22 @@ import (
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	userRepo := repository.NewUserRepo()
-	gameRepo := repository.NewGameRepo()
-	publisherRepo := repository.NewPublisherRepo()
-	platformRepo := repository.NewPlatformRepo()
-	genreRepo := repository.NewGenreRepo()
-	userService := service.NewUserService(userRepo)
-	gameService := service.NewGameService(gameRepo)
-	publisherService := service.NewPublisherService(publisherRepo)
-	platformService := service.NewPlatformService(platformRepo)
-	genreService := service.NewGenreService(genreRepo)
-	err := userService.SetupAdmin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	service.Public, service.Private, err = ed25519.GenerateKey(nil)
+	//TODO: move init repo and servise to main
+	DB := database.ConnectDataBase()
+	userRepo := user_repo.NewPostgresUserRepo(DB)
+	gameRepo := game_repo.NewPostgresGameRepo(DB)
+	publisherRepo := publisher_repo.NewPostgresPublisherRepo(DB)
+	platformRepo := platform_repo.NewPostgresPlatformRepo(DB)
+	genreRepo := genre_repo.NewPostgresGenreRepo(DB)
+	genreOnGameRepo := game_repo.NewPostgresGenresOnGamesRepo(DB)
+	platformOnGameRepo := game_repo.NewPostgresPlatformsOnGamesRepo(DB)
+	userService := user.NewUserService(userRepo)
+	gameService := game.NewGameService(gameRepo, genreOnGameRepo, platformOnGameRepo)
+	publisherService := publisher.NewPublisherService(publisherRepo)
+	platformService := platform.NewPlatformService(platformRepo)
+	genreService := genre.NewGenreService(genreRepo)
+	var err error
+	jwt.Public, jwt.Private, err = ed25519.GenerateKey(nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,7 +61,7 @@ func SetupRouter() *gin.Engine {
 		}
 	}
 
-	gameHandler := handler.NewGameHandler(gameService, publisherService)
+	gameHandler := handler.NewGameHandler(gameService, publisherService, genreService, platformService)
 	games := r.Group("/games")
 	games.Use(middleware.Auth())
 	{

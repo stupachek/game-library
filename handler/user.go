@@ -23,7 +23,11 @@ func (u *UserHandler) GetUser(c *gin.Context) {
 }
 
 func (u *UserHandler) GetUsers(c *gin.Context) {
-	users := u.UserService.GetUsers()
+	users, err := u.UserService.GetUsers()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": users})
 }
 

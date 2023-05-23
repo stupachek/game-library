@@ -1,4 +1,4 @@
-package service
+package game
 
 import (
 	"errors"
@@ -16,15 +16,9 @@ type GameService struct {
 type IGameRepo interface {
 	CreateGame(game models.Game) error
 	GetGameById(id uuid.UUID) (models.Game, error)
-	GetGamesList() []models.Game
+	GetGames() ([]models.Game, error)
 	//UpdateGame(id uuid.UUID, game models.Game) (models.Game, error)
 	//Delete(id uuid.UUID)
-}
-
-type IGenreRepo interface {
-	GetGenre(name string) (models.Genre, error)
-	GetGenresList() []models.Genre
-	CreateGenre(genre models.Genre) models.Genre
 }
 
 type IGenresOnGamesRepo interface {
@@ -35,26 +29,19 @@ type IPlatformsOnGamesRepo interface {
 	CreatePlatformsOnGames(PlatformsOnGames models.PlatformsOnGames) error
 }
 
-type IPublisherRepo interface {
-	GetPublishersList() []models.Publisher
-	CreatePublisher(publisher models.Publisher) models.Publisher
-	UpdatePublisher(id uuid.UUID, publisher models.PublisherModel) (models.Publisher, error)
-	GetPublisherById(id uuid.UUID) (*models.Publisher, error)
-	Delete(id uuid.UUID)
-}
-
 var ErrParseId = errors.New("can't parse id")
 var ErrUnknownId = errors.New("unknown id")
 
-func NewGameService(repo IGameRepo) GameService {
+func NewGameService(gameRepo IGameRepo, genresOnGamesRepo IGenresOnGamesRepo, platformsOnGamesRepo IPlatformsOnGamesRepo) GameService {
 	return GameService{
-		GameRepo: repo,
+		GameRepo:             gameRepo,
+		GenresOnGamesRepo:    genresOnGamesRepo,
+		PlatformsOnGamesRepo: platformsOnGamesRepo,
 	}
 }
 
-func (g *GameService) GetGamesList() []models.Game {
-	games := g.GameRepo.GetGamesList()
-	return games
+func (g *GameService) GetGamesList() ([]models.Game, error) {
+	return g.GameRepo.GetGames()
 }
 
 func (g *GameService) GetGame(idStr string) (models.Game, error) {

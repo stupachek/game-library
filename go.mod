@@ -4,16 +4,14 @@ go 1.19
 
 require (
 	github.com/gin-gonic/gin v1.9.0
-	github.com/go-chi/chi/v5 v5.0.8
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.0
-	github.com/julienschmidt/httprouter v1.3.0
+	github.com/lib/pq v1.10.9
 )
 
 require (
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/gordonklaus/ineffassign v0.0.0-20230107090616-13ace0543b28 // indirect
-	golang.org/x/mod v0.9.0 // indirect
-	golang.org/x/tools v0.7.0 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
 
 require (

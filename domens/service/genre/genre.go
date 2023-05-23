@@ -1,4 +1,4 @@
-package service
+package genre
 
 import (
 	"fmt"
@@ -6,6 +6,12 @@ import (
 
 	"github.com/google/uuid"
 )
+
+type IGenreRepo interface {
+	GetGenre(name string) (models.Genre, error)
+	GetGenresList() ([]models.Genre, error)
+	CreateGenre(genre models.Genre) error
+}
 
 type GenreService struct {
 	GenreRepo IGenreRepo
@@ -28,17 +34,16 @@ func (g *GenreService) GetGenre(name string) (models.Genre, error) {
 	return genre, nil
 }
 
-func (g *GenreService) GetGenresList() []models.Genre {
-	genres := g.GenreRepo.GetGenresList()
-	return genres
+func (g *GenreService) GetGenresList() ([]models.Genre, error) {
+	return g.GenreRepo.GetGenresList()
 }
 
-func (g *GenreService) CreateGenre(genreModel models.Genre) models.Genre {
+func (g *GenreService) CreateGenre(genreModel models.Genre) (models.Genre, error) {
 	id, _ := uuid.NewRandom()
 	genre := models.Genre{
 		ID:   id,
 		Name: genreModel.Name,
 	}
-	createdGenre := g.GenreRepo.CreateGenre(genre)
-	return createdGenre
+	err := g.GenreRepo.CreateGenre(genre)
+	return genre, err
 }
