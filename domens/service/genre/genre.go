@@ -1,4 +1,4 @@
-package service
+package genre
 
 import (
 	"fmt"
@@ -6,6 +6,12 @@ import (
 
 	"github.com/google/uuid"
 )
+
+type IGenreRepo interface {
+	GetGenre(name string) (models.Genre, error)
+	GetGenresList() ([]models.Genre, error)
+	CreateGenre(genre models.Genre) error
+}
 
 type GenreService struct {
 	GenreRepo IGenreRepo

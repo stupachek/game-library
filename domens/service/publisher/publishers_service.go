@@ -1,4 +1,4 @@
-package service
+package publisher
 
 import (
 	"errors"
@@ -10,6 +10,14 @@ import (
 var (
 // ErrPublisher = errors.New("error on publisher create")
 )
+
+type IPublisherRepo interface {
+	GetPublishersList() ([]models.Publisher, error)
+	CreatePublisher(pub models.Publisher) error
+	GetPublisherById(id uuid.UUID) (*models.Publisher, error)
+	UpdatePublisher(id uuid.UUID, publisher models.PublisherModel) error
+	Delete(id uuid.UUID) error
+}
 
 type PublisherService struct {
 	PublisherRepo IPublisherRepo

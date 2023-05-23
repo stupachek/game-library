@@ -1,20 +1,19 @@
-package repository
+package platform_repo
 
 import (
 	"database/sql"
+	"errors"
 	"game-library/domens/models"
 	"sync"
 
 	"github.com/google/uuid"
 )
 
-//var ErrUnknownPlatform error = errors.New("unknown platform")
-
-type IPlatformRepo interface {
-	GetPlatform(name string) (models.Platform, error)
-	GetPlatformsList() ([]models.Platform, error)
-	CreatePlatform(platform models.Platform) error
-}
+var (
+	ErrUpdateFailed error = errors.New("update failed")
+	ErrDeleteFailed error = errors.New("delete failed")
+	ErrGetPlatform  error = errors.New("get platform failed")
+)
 
 type TestPlatformRepo struct {
 	Platforms map[uuid.UUID]*models.Platform
@@ -63,7 +62,7 @@ func (t *TestPlatformRepo) GetPlatform(name string) (models.Platform, error) {
 			return *Platform, nil
 		}
 	}
-	return models.Platform{}, ErrDublicateEmail
+	return models.Platform{}, ErrGetPlatform
 }
 
 func (t *TestPlatformRepo) GetPlatformsList() ([]models.Platform, error) {

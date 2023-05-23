@@ -1,9 +1,10 @@
-package service
+package user
 
 import (
 	"errors"
 	"game-library/domens/models"
-	"game-library/domens/repository"
+	repository "game-library/domens/repository/user_repo"
+	"game-library/domens/service/jwt"
 	"log"
 	"os"
 
@@ -85,7 +86,7 @@ func (u *UserService) Login(loginUser models.LoginModel) (string, error) {
 	if err != nil || !ok {
 		return "", ErrUnauthenticated
 	}
-	return NewJWT(user.ID.String())
+	return jwt.NewJWT(user.ID.String())
 }
 
 func (u *UserService) GetUser(idStr string) (models.User, error) {

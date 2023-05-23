@@ -1,4 +1,4 @@
-package repository
+package game_repo
 
 import (
 	"database/sql"

@@ -1,4 +1,4 @@
-package repository
+package genre_repo
 
 import (
 	"database/sql"

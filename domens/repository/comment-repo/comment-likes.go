@@ -1,11 +1,16 @@
-package repository
+package comment_repo
 
 import (
 	"database/sql"
+	"errors"
 	"game-library/domens/models"
 	"sync"
 
 	"github.com/google/uuid"
+)
+
+var (
+	ErrDeleteFailed error = errors.New("delete failed")
 )
 
 type TestCommentLikesRepo struct {

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"game-library/domens/models"
-	"game-library/domens/service"
+	"game-library/domens/service/jwt"
 	"game-library/handler"
 	"log"
 	"net/http"
@@ -16,7 +16,7 @@ var ErrPermissionDenied = gin.H{"error": "permission denied"}
 func Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.GetHeader("Authorization")
-		id, err := service.ValidateToken(token)
+		id, err := jwt.ValidateToken(token)
 		ctx.Set("UserID", id)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, handler.ErrUnauthenticated)

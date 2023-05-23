@@ -1,7 +1,11 @@
 package handler
 
 import (
-	"game-library/domens/service"
+	"game-library/domens/service/game"
+	"game-library/domens/service/genre"
+	"game-library/domens/service/platform"
+	"game-library/domens/service/publisher"
+	service "game-library/domens/service/user"
 )
 
 type UserHandler struct {
@@ -9,22 +13,22 @@ type UserHandler struct {
 }
 
 type GameHandler struct {
-	GameService      service.GameService
-	PublisherService service.PublisherService
-	GenreService     service.GenreService
-	PlatformService  service.PlatformService
+	GameService      game.GameService
+	PublisherService publisher.PublisherService
+	GenreService     genre.GenreService
+	PlatformService  platform.PlatformService
 }
 
 type PublisherHandler struct {
-	PublisherService service.PublisherService
+	PublisherService publisher.PublisherService
 }
 
 type GenreHandler struct {
-	GenreService service.GenreService
+	GenreService genre.GenreService
 }
 
 type PlatformHandler struct {
-	PlatformService service.PlatformService
+	PlatformService platform.PlatformService
 }
 
 func NewUserHadler(service service.UserService) UserHandler {
@@ -33,7 +37,7 @@ func NewUserHadler(service service.UserService) UserHandler {
 	}
 }
 
-func NewGameHandler(game service.GameService, publisher service.PublisherService, genre service.GenreService, platform service.PlatformService) GameHandler {
+func NewGameHandler(game game.GameService, publisher publisher.PublisherService, genre genre.GenreService, platform platform.PlatformService) GameHandler {
 	return GameHandler{
 		GameService:      game,
 		PublisherService: publisher,
@@ -42,19 +46,19 @@ func NewGameHandler(game service.GameService, publisher service.PublisherService
 	}
 }
 
-func NewPublisherHandler(service service.PublisherService) PublisherHandler {
+func NewPublisherHandler(service publisher.PublisherService) PublisherHandler {
 	return PublisherHandler{
 		PublisherService: service,
 	}
 }
 
-func NewPlatformHandler(service service.PlatformService) PlatformHandler {
+func NewPlatformHandler(service platform.PlatformService) PlatformHandler {
 	return PlatformHandler{
 		PlatformService: service,
 	}
 }
 
-func NewGenreHandler(service service.GenreService) GenreHandler {
+func NewGenreHandler(service genre.GenreService) GenreHandler {
 	return GenreHandler{
 		GenreService: service,
 	}

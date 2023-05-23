@@ -1,4 +1,4 @@
-package repository
+package publisher_repo
 
 import (
 	"database/sql"
@@ -10,14 +10,10 @@ import (
 )
 
 var (
-	ErrPublisherNotFound = errors.New("publisher does not exist")
+	ErrPublisherNotFound       = errors.New("publisher does not exist")
+	ErrDeleteFailed      error = errors.New("delete failed")
+	ErrUpdateFailed      error = errors.New("update failed")
 )
-
-type IPublisherRepo interface {
-	GetPublishersList() ([]models.Publisher, error)
-	CreatePublisher(pub models.Publisher) error
-	Delete(id uuid.UUID) error
-}
 
 type TestPublisherRepo struct {
 	Publishers map[uuid.UUID]*models.Publisher

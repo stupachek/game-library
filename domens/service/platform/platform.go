@@ -1,17 +1,22 @@
-package service
+package platform
 
 import (
 	"game-library/domens/models"
-	"game-library/domens/repository"
 
 	"github.com/google/uuid"
 )
 
-type PlatformService struct {
-	PlatformRepo repository.IPlatformRepo
+type IPlatformRepo interface {
+	GetPlatform(name string) (models.Platform, error)
+	GetPlatformsList() ([]models.Platform, error)
+	CreatePlatform(platform models.Platform) error
 }
 
-func NewPlatformService(repo repository.IPlatformRepo) PlatformService {
+type PlatformService struct {
+	PlatformRepo IPlatformRepo
+}
+
+func NewPlatformService(repo IPlatformRepo) PlatformService {
 	return PlatformService{
 		PlatformRepo: repo,
 	}

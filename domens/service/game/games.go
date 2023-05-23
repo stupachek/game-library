@@ -1,4 +1,4 @@
-package service
+package game
 
 import (
 	"errors"
@@ -21,26 +21,12 @@ type IGameRepo interface {
 	//Delete(id uuid.UUID)
 }
 
-type IGenreRepo interface {
-	GetGenre(name string) (models.Genre, error)
-	GetGenresList() ([]models.Genre, error)
-	CreateGenre(genre models.Genre) error
-}
-
 type IGenresOnGamesRepo interface {
 	CreateGenresOnGames(genresOnGames models.GenresOnGames) error
 }
 
 type IPlatformsOnGamesRepo interface {
 	CreatePlatformsOnGames(PlatformsOnGames models.PlatformsOnGames) error
-}
-
-type IPublisherRepo interface {
-	GetPublishersList() ([]models.Publisher, error)
-	CreatePublisher(pub models.Publisher) error
-	GetPublisherById(id uuid.UUID) (*models.Publisher, error)
-	UpdatePublisher(id uuid.UUID, publisher models.PublisherModel) error
-	Delete(id uuid.UUID) error
 }
 
 var ErrParseId = errors.New("can't parse id")
