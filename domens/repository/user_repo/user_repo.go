@@ -18,16 +18,6 @@ var (
 	ErrDeleteFailed      error = errors.New("delete failed")
 )
 
-type IUserRepo interface {
-	CreateUser(models.User) error
-	CreateAdmin(models.User) error
-	GetUserByEmail(email string) (models.User, error)
-	GetUserById(id uuid.UUID) (*models.User, error)
-	GetUsers() ([]models.User, error)
-	UpdateRole(id uuid.UUID, role string) error
-	Delete(id uuid.UUID) error
-}
-
 type TestUserRepo struct {
 	Users map[uuid.UUID]*models.User
 	sync.Mutex
@@ -47,6 +37,16 @@ func NewPostgresUserRepo(DB *sql.DB) *PostgresUserRepo {
 	return &PostgresUserRepo{
 		DB: DB,
 	}
+}
+
+func (t *TestUserRepo) Setup() {
+	t.CreateUser(models.User{
+		ID:             uuid.UUID{111},
+		Email:          "test",
+		Username:       "test",
+		Role:           "test",
+		HashedPassword: "test",
+	})
 }
 
 func (p *PostgresUserRepo) Migrate() error {
