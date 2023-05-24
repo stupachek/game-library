@@ -39,14 +39,15 @@ func NewPostgresUserRepo(DB *sql.DB) *PostgresUserRepo {
 	}
 }
 
-func (t *TestUserRepo) Setup() {
-	t.CreateUser(models.User{
+func (t *TestUserRepo) Setup() error {
+	err := t.CreateUser(models.User{
 		ID:             uuid.UUID{111},
 		Email:          "test",
 		Username:       "test",
 		Role:           "test",
 		HashedPassword: "test",
 	})
+	return err
 }
 
 func (p *PostgresUserRepo) Migrate() error {

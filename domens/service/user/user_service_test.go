@@ -72,7 +72,10 @@ func TestLogin(t *testing.T) {
 		},
 	}
 	repo := user_repo.NewUserRepo()
-	repo.Setup()
+	err := repo.Setup()
+	if err != nil {
+		t.Error(err)
+	}
 	servive := NewUserService(repo)
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
@@ -113,7 +116,10 @@ func TestGetUser(t *testing.T) {
 		},
 	}
 	repo := user_repo.NewUserRepo()
-	repo.Setup()
+	err := repo.Setup()
+	if err != nil {
+		t.Error(err)
+	}
 	servive := NewUserService(repo)
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
@@ -148,7 +154,10 @@ func TestDeleteUser(t *testing.T) {
 		},
 	}
 	repo := user_repo.NewUserRepo()
-	repo.Setup()
+	err := repo.Setup()
+	if err != nil {
+		t.Error(err)
+	}
 	servive := NewUserService(repo)
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
@@ -222,7 +231,10 @@ func TestChangeRole(t *testing.T) {
 		},
 	}
 	repo := user_repo.NewUserRepo()
-	repo.Setup()
+	err := repo.Setup()
+	if err != nil {
+		t.Error(err)
+	}
 	servive := NewUserService(repo)
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
