@@ -56,3 +56,8 @@ func ConnectDataBase() *sql.DB {
 	}
 	return DB
 }
+
+func ClearData(db *sql.DB) error {
+	_, err := db.Query("TRUNCATE TABLE  users, games, genres, publishers CASCADE;")
+	return err
+}
