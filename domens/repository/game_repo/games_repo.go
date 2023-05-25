@@ -121,3 +121,15 @@ func (t *TestGameRepo) checkIfExist(game models.Game) error {
 	}
 	return nil
 }
+
+func (t *TestGameRepo) Setup() {
+	t.Games[uuid.UUID{111}] = &models.Game{
+		ID:             [16]byte{111},
+		PublisherId:    [16]byte{123},
+		Title:          "test",
+		Description:    "test",
+		ImageLink:      "test",
+		AgeRestriction: 12,
+		ReleaseYear:    2012,
+	}
+}

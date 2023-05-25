@@ -138,7 +138,7 @@ func TestGetUser(t *testing.T) {
 
 }
 
-func TestDeleteUser(t *testing.T) {
+func TestGetDeleteUser(t *testing.T) {
 	testCases := []struct {
 		description   string
 		idStr         string
