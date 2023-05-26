@@ -126,8 +126,8 @@ func TestGetChangeRoleUser(t *testing.T) {
 		if err != nil {
 			t.Fatalf(" expected %v, got %v", nil, err)
 		}
-		if len(users) != 3 {
-			t.Fatalf(" expected %v users, got %v", 3, len(users))
+		if len(users) != 4 {
+			t.Fatalf(" expected %v users, got %v", 4, len(users))
 		}
 		user, err := userService.ChangeRole(users[0].ID.String(), models.ADMIN)
 		if err != nil {
@@ -192,8 +192,8 @@ func TestDeleteUser(t *testing.T) {
 		if err != nil {
 			t.Fatalf(" expected %v, got %v", nil, err)
 		}
-		if len(users) != 3 {
-			t.Fatalf(" expected %v users, got %v", 3, len(users))
+		if len(users) != 4 {
+			t.Fatalf(" expected %v users, got %v", 4, len(users))
 		}
 		err = userService.DeleteUser(users[0].ID.String())
 		if err != nil {
@@ -203,7 +203,7 @@ func TestDeleteUser(t *testing.T) {
 		if err != nil {
 			t.Fatalf(" expected %v, got %v", nil, err)
 		}
-		if len(users) != 2 {
+		if len(users) != 3 {
 			t.Fatalf(" expected %v users, got %v", 3, len(users))
 		}
 		err = userService.DeleteUser("error")
@@ -214,7 +214,7 @@ func TestDeleteUser(t *testing.T) {
 		if err != nil {
 			t.Fatalf(" expected %v, got %v", nil, err)
 		}
-		if len(users) != 2 {
+		if len(users) != 3 {
 			t.Fatalf(" expected %v users, got %v", 3, len(users))
 		}
 

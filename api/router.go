@@ -2,7 +2,7 @@ package api
 
 import (
 	"crypto/ed25519"
-	"game-library/domens/repository/database"
+	"database/sql"
 	"game-library/domens/repository/game_repo"
 	"game-library/domens/repository/genre_repo"
 	"game-library/domens/repository/platform_repo"
@@ -21,10 +21,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(DB *sql.DB) *gin.Engine {
 	r := gin.Default()
 	//TODO: move init repo and servise to main
-	DB := database.ConnectDataBase()
 	userRepo := user_repo.NewPostgresUserRepo(DB)
 	gameRepo := game_repo.NewPostgresGameRepo(DB)
 	publisherRepo := publisher_repo.NewPostgresPublisherRepo(DB)
@@ -49,11 +48,11 @@ func SetupRouter() *gin.Engine {
 		auth.POST("/signin", userHandler.Login)
 	}
 	users := r.Group("/users")
-	users.Use(middleware.Auth())
 	{
-		users.GET("/me", userHandler.GetUser)
 		users.GET("/:id", userHandler.GetUser)
 		users.GET("", userHandler.GetUsers)
+		users.Use(middleware.Auth())
+		users.GET("/me", userHandler.GetUser)
 		{
 			users.Use(middleware.CheckIfAdmin(&userHandler))
 			users.PATCH("/:id", userHandler.ChangerRole)
