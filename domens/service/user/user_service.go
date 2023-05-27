@@ -121,6 +121,7 @@ func (u *UserService) ChangeRole(idStr string, role string) (models.User, error)
 
 func newPassword(password string) (string, error) {
 	argon := argon2.DefaultConfig()
+	argon.MemoryCost = 32 * 1024
 
 	hashedPasword, err := argon.HashEncoded([]byte(password))
 	if err != nil {

@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAll(t *testing.T) {
+func TestUser(t *testing.T) {
 	DB := database.ConnectDataBase()
 	err := database.ClearData(DB)
 	if err != nil {
@@ -42,7 +42,7 @@ func TestAll(t *testing.T) {
 		req, _ = http.NewRequest("POST", "/auth/signup", bytes.NewBuffer(jsonValue))
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code)
-		assert.Equal(t, "{\"errors\":\"pq: duplicate key value violates unique constraint \\\"users_email_key\\\"\"}", w.Body.String())
+		assert.Equal(t, "{\"error\":\"pq: duplicate key value violates unique constraint \\\"users_email_key\\\"\",\"message\":\"can't register\"}", w.Body.String())
 
 		// sing up can't bind
 		wrong := ""
@@ -50,14 +50,14 @@ func TestAll(t *testing.T) {
 		req, _ = http.NewRequest("POST", "/auth/signup", bytes.NewBuffer([]byte(wrong)))
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code)
-		assert.Equal(t, "{\"errors\":\"EOF\"}", w.Body.String())
+		assert.Equal(t, "{\"error\":\"EOF\",\"message\":\"can't parse input\"}", w.Body.String())
 
 		// sing in can't bind
 		w = httptest.NewRecorder()
 		req, _ = http.NewRequest("POST", "/auth/signin", bytes.NewBuffer([]byte(wrong)))
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 401, w.Code)
-		assert.Equal(t, "{\"errors\":\"EOF\"}", w.Body.String())
+		assert.Equal(t, "{\"error\":\"EOF\",\"message\":\"can't parse input\"}", w.Body.String())
 
 		//login user with wrong password
 		inputL := models.LoginModel{
@@ -69,7 +69,7 @@ func TestAll(t *testing.T) {
 		req, _ = http.NewRequest("POST", "/auth/signin", bytes.NewBuffer(jsonValue))
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 401, w.Code)
-		assert.Regexp(t, "{\"errors\":\"unauthenticated\"}", w.Body.String())
+		assert.Equal(t, "{\"error\":\"unauthenticated\",\"message\":\"can't login\"}", w.Body.String())
 
 		//login user
 		inputL = models.LoginModel{
@@ -134,7 +134,7 @@ func TestAll(t *testing.T) {
 		req, _ = http.NewRequest("GET", url, nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code)
-		assert.Equal(t, "{\"errors\":\"sql: no rows in result set\"}", w.Body.String())
+		assert.Equal(t, "{\"error\":\"sql: no rows in result set\",\"message\":\"can't get user\"}", w.Body.String())
 
 	})
 }

@@ -18,11 +18,13 @@ import (
 	"game-library/middleware"
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter(DB *sql.DB) *gin.Engine {
 	r := gin.Default()
+	r.Use(cors.Default())
 	//TODO: move init repo and servise to main
 	userRepo := user_repo.NewPostgresUserRepo(DB)
 	gameRepo := game_repo.NewPostgresGameRepo(DB)

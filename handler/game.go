@@ -29,7 +29,7 @@ type InputGame struct {
 func (g *GameHandler) GetGamesList(c *gin.Context) {
 	games, err := g.GameService.GetGamesList()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't get list games"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": games})
@@ -39,7 +39,7 @@ func (g *GameHandler) GetGame(c *gin.Context) {
 	idStr := c.Param("id")
 	game, err := g.GameService.GetGame(idStr)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't get game"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": game})
@@ -48,7 +48,7 @@ func (g *GameHandler) GetGame(c *gin.Context) {
 func (g *GameHandler) UpdateGame(c *gin.Context) {
 	inputGame := InputGame{}
 	if err := c.ShouldBind(&inputGame); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"errors": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't update game"})
 		return
 	}
 	file := inputGame.File
@@ -87,7 +87,7 @@ func (g *GameHandler) fromStringToPlatform(stringPlatform []string) ([]models.Pl
 func (g *GameHandler) CreateGame(c *gin.Context) {
 	inputGame := InputGame{}
 	if err := c.ShouldBind(&inputGame); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't create game"})
 		return
 	}
 
@@ -98,7 +98,7 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		return
 	}
 	if err := c.SaveUploadedFile(file, dst); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't save file"})
 		return
 	}
 	c.Set("dst", dst)
