@@ -25,6 +25,7 @@ import (
 func SetupRouter(DB *sql.DB) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.Default())
+	r.Use(middleware.CORSMiddleware())
 	//TODO: move init repo and servise to main
 	userRepo := user_repo.NewPostgresUserRepo(DB)
 	gameRepo := game_repo.NewPostgresGameRepo(DB)
@@ -80,6 +81,7 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 		publishers.GET("/:id", publisherHandler.GetPublisher)
 		{
 			publishers.Use(middleware.Auth())
+			publishers.Use(middleware.CheckIfManager(&userHandler))
 			publishers.POST("", publisherHandler.CreatePublisher)
 			publishers.PATCH("/:id", publisherHandler.UpdatePublisher)
 			publishers.DELETE("/:id", publisherHandler.DeletePublisher)
@@ -92,6 +94,7 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 		platforms.GET("", platformHandler.GetPlatformsList)
 		{
 			platforms.Use(middleware.Auth())
+			platforms.Use(middleware.CheckIfManager(&userHandler))
 			platforms.POST("", platformHandler.CreatePlatform)
 		}
 	}
@@ -102,6 +105,7 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 		genres.GET("", genreHandler.GetGenresList)
 		{
 			genres.Use(middleware.Auth())
+			genres.Use(middleware.CheckIfManager(&userHandler))
 			genres.POST("", genreHandler.CreateGenre)
 		}
 	}

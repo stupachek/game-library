@@ -52,8 +52,8 @@ type PlatformsOnGames struct {
 }
 
 type Genre struct {
-	ID   uuid.UUID
-	Name string
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type GenresOnGames struct {
