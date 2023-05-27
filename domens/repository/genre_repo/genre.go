@@ -58,12 +58,12 @@ func (p *PostgresGenreRepo) GetGenre(name string) (models.Genre, error) {
 	return genre, nil
 }
 
-func (t *TestGenreRepo) GetGenresList() []models.Genre {
+func (t *TestGenreRepo) GetGenresList() ([]models.Genre, error) {
 	genres := make([]models.Genre, 0)
 	for _, user := range t.Genres {
 		genres = append(genres, *user)
 	}
-	return genres
+	return genres, nil
 
 }
 
@@ -91,4 +91,11 @@ func (t *TestGenreRepo) CreateGenre(genre models.Genre) error {
 func (p *PostgresGenreRepo) CreateGenre(genre models.Genre) error {
 	_, err := p.DB.Exec("INSERT INTO genres(id, name) values($1, $2)", genre.ID, genre.Name)
 	return err
+}
+
+func (t *TestGenreRepo) Setup() {
+	t.Genres[uuid.UUID{111}] = &models.Genre{
+		ID:   uuid.UUID{111},
+		Name: "test",
+	}
 }

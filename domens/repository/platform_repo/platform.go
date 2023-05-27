@@ -12,7 +12,6 @@ import (
 var (
 	ErrUpdateFailed error = errors.New("update failed")
 	ErrDeleteFailed error = errors.New("delete failed")
-	ErrGetPlatform  error = errors.New("get platform failed")
 )
 
 type TestPlatformRepo struct {
@@ -62,7 +61,7 @@ func (t *TestPlatformRepo) GetPlatform(name string) (models.Platform, error) {
 			return *Platform, nil
 		}
 	}
-	return models.Platform{}, ErrGetPlatform
+	return models.Platform{}, nil
 }
 
 func (t *TestPlatformRepo) GetPlatformsList() ([]models.Platform, error) {
@@ -100,4 +99,11 @@ func (t *TestPlatformRepo) CreatePlatform(platform models.Platform) error {
 func (p *PostgresPlatformRepo) CreatePlatform(platform models.Platform) error {
 	_, err := p.DB.Exec("INSERT INTO platforms(id, name) values($1, $2)", platform.ID, platform.Name)
 	return err
+}
+
+func (t *TestPlatformRepo) Setup() {
+	t.Platforms[uuid.UUID{111}] = &models.Platform{
+		ID:   uuid.UUID{111},
+		Name: "test",
+	}
 }

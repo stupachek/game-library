@@ -58,7 +58,7 @@ func ConnectDataBase() *sql.DB {
 }
 
 func ClearData(db *sql.DB) error {
-	_, err := db.Query("TRUNCATE TABLE  users, games, genres, publishers CASCADE;")
+	_, err := db.Query("TRUNCATE TABLE  users, games, genres, platforms, publishers CASCADE;")
 	if err != nil {
 		return err
 	}
