@@ -24,8 +24,13 @@ import (
 
 func SetupRouter(DB *sql.DB) *gin.Engine {
 	r := gin.Default()
-	r.Use(cors.Default())
-	r.Use(middleware.CORSMiddleware())
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins: false,
+		AllowOrigins:    []string{"*"},
+		AllowMethods:    []string{"GET", "POST", "DELETE", "OPTINS"},
+		AllowHeaders:    []string{"*"},
+	}))
+	// r.Use(middleware.CORSMiddleware())
 	//TODO: move init repo and servise to main
 	userRepo := user_repo.NewPostgresUserRepo(DB)
 	gameRepo := game_repo.NewPostgresGameRepo(DB)
