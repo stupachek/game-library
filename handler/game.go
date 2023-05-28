@@ -127,5 +127,5 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully created", "data": gin.H{"dameId": game.ID, "link": dst}})
+	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully created", "data": gin.H{"gameId": game.ID, "link": dst}})
 }

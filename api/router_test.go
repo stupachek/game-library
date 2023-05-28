@@ -5,11 +5,16 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"game-library/domens/models"
 	"game-library/domens/repository/database"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -381,6 +386,163 @@ func TestPlatforms(t *testing.T) {
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
 		assert.Regexp(t, "\"name\":\"test\"}]}$", w.Body.String())
+
+	})
+}
+
+func TestGamesSuccess(t *testing.T) {
+	DB := database.ConnectDataBase()
+	err := database.ClearData(DB)
+	if err != nil {
+		t.Error(err)
+	}
+	router := SetupRouter(DB)
+
+	t.Run("create, get game", func(t *testing.T) {
+		//login admin
+		inputL := models.LoginModel{
+			Email:    "admin@a.a",
+			Password: "admin",
+		}
+		jsonValue, _ := json.Marshal(inputL)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/auth/signin", bytes.NewBuffer(jsonValue))
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"message\":\"Sign up was successful\",\"token\":\"([a-zA-Z0-9-_.]{207})\"}", w.Body.String())
+		token := w.Body.String()[w.Body.Len()-209 : w.Body.Len()-2]
+
+		//create platform
+		inputPlatform := models.Platform{
+			Name: "testPlatform",
+		}
+		jsonValue, _ = json.Marshal(inputPlatform)
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/platforms", bytes.NewBuffer(jsonValue))
+		req.Header.Set("Authorization", token)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"data\":{\"id\":\"([a-zA-Z0-9-]{36})\",\"name\":\"testPlatform\"},\"message\":\"Platform is successfully created\"}", w.Body.String())
+
+		//create genre
+		inputGenre := models.Genre{
+			Name: "testGenre1",
+		}
+		jsonValue, _ = json.Marshal(inputGenre)
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/genres", bytes.NewBuffer(jsonValue))
+		req.Header.Set("Authorization", token)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"data\":{\"id\":\"([a-zA-Z0-9-]{36})\",\"name\":\"testGenre1\"},\"message\":\"Genre is successfully created\"}", w.Body.String())
+
+		//create genre
+		inputGenre = models.Genre{
+			Name: "testGenre2",
+		}
+		jsonValue, _ = json.Marshal(inputGenre)
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/genres", bytes.NewBuffer(jsonValue))
+		req.Header.Set("Authorization", token)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"data\":{\"id\":\"([a-zA-Z0-9-]{36})\",\"name\":\"testGenre2\"},\"message\":\"Genre is successfully created\"}", w.Body.String())
+
+		//create publisher
+		inputPublisher := models.Publisher{
+			Name: "test",
+		}
+		jsonValue, _ = json.Marshal(inputPublisher)
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/publishers", bytes.NewBuffer(jsonValue))
+		req.Header.Set("Authorization", token)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"data\":{\"id\":\"([a-zA-Z0-9-]{36})\",\"name\":\"test\"},\"message\":\"Publisher is successfully created\"}", w.Body.String())
+		pattern := regexp.MustCompile("[a-zA-Z0-9-]{36}")
+		publisherId := pattern.FindString(w.Body.String())
+
+		genres := []string{"testGenre1", "testGenre2"}
+		platforms := []string{"testPlatform"}
+		fmt.Print(genres, platforms)
+
+		//create game
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		fw, err := writer.CreateFormField("title")
+		if err != nil {
+			t.Error(err)
+		}
+		_, err = io.Copy(fw, strings.NewReader("testGame"))
+		if err != nil {
+			t.Error(err)
+		}
+		fw, err = writer.CreateFormField("publisherId")
+		if err != nil {
+			t.Error(err)
+		}
+		_, err = io.Copy(fw, strings.NewReader(publisherId))
+		if err != nil {
+			t.Error(err)
+		}
+
+		fw, err = writer.CreateFormFile("file", "test.png")
+		if err != nil {
+		}
+		file, err := os.Open("test.png")
+		if err != nil {
+			t.Error(err)
+		}
+		_, err = io.Copy(fw, file)
+		if err != nil {
+			t.Error(err)
+		}
+
+		fw, err = writer.CreateFormField("genres")
+		if err != nil {
+			t.Error(err)
+		}
+		_, err = io.Copy(fw, strings.NewReader(genres[0]))
+		if err != nil {
+			t.Error(err)
+		}
+		fw, err = writer.CreateFormField("genres")
+		if err != nil {
+			t.Error(err)
+		}
+		_, err = io.Copy(fw, strings.NewReader(genres[1]))
+		if err != nil {
+			t.Error(err)
+		}
+		fw, err = writer.CreateFormField("platforms")
+		if err != nil {
+			t.Error(err)
+		}
+		_, err = io.Copy(fw, strings.NewReader(platforms[0]))
+		if err != nil {
+			t.Error(err)
+		}
+
+		writer.Close()
+
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/games", bytes.NewReader(body.Bytes()))
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+		req.Header.Set("Authorization", token)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"data\":{\"gameId\":\"([a-zA-Z0-9-]{36})\",\"link\":\"library/test.png\"},\"message\":\"Game is successfully created\"", w.Body.String())
+		err = os.Remove("library/test.png")
+		if err != nil {
+			t.Error(err)
+		}
+
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/games", bytes.NewReader(body.Bytes()))
+		req, _ = http.NewRequest("GET", "/games", bytes.NewReader(body.Bytes()))
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, `{"data":\[{"id":"([a-zA-Z0-9-]{36})","title":"testGame","description":"","imageLink":"library/test.png","ageRestriction":0,"releaseYear":0,"publisher":{"id":"([a-zA-Z0-9-]{36})","name":"test"},"genres":\[\{"id":"([a-zA-Z0-9-]{36})","name":"testGenre2"\},\{"id":"([a-zA-Z0-9-]{36})","name":"testGenre1"\}\],"platforms":\[\{"id":"([a-zA-Z0-9-]{36})","name":"testPlatform"\}\]}\]}`, w.Body.String())
 
 	})
 }
