@@ -147,7 +147,7 @@ func TestGenres(t *testing.T) {
 	}
 	router := SetupRouter(DB)
 
-	t.Run("user", func(t *testing.T) {
+	t.Run("genres", func(t *testing.T) {
 		//login admin
 		inputL := models.LoginModel{
 			Email:    "admin@a.a",
@@ -229,7 +229,7 @@ func TestPublishers(t *testing.T) {
 	}
 	router := SetupRouter(DB)
 
-	t.Run("user", func(t *testing.T) {
+	t.Run("publisher", func(t *testing.T) {
 		//login admin
 		inputL := models.LoginModel{
 			Email:    "admin@a.a",
@@ -296,6 +296,88 @@ func TestPublishers(t *testing.T) {
 		//get publishers
 		w = httptest.NewRecorder()
 		req, _ = http.NewRequest("GET", "/publishers", nil)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "\"name\":\"test\"}]}$", w.Body.String())
+
+	})
+}
+
+func TestPlatforms(t *testing.T) {
+	DB := database.ConnectDataBase()
+	err := database.ClearData(DB)
+	if err != nil {
+		t.Error(err)
+	}
+	router := SetupRouter(DB)
+
+	t.Run("platforms", func(t *testing.T) {
+		//login admin
+		inputL := models.LoginModel{
+			Email:    "admin@a.a",
+			Password: "admin",
+		}
+		jsonValue, _ := json.Marshal(inputL)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("POST", "/auth/signin", bytes.NewBuffer(jsonValue))
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"message\":\"Sign up was successful\",\"token\":\"([a-zA-Z0-9-_.]{207})\"}", w.Body.String())
+		token := w.Body.String()[w.Body.Len()-209 : w.Body.Len()-2]
+
+		//create platform
+		input := models.Platform{
+			Name: "test",
+		}
+		jsonValue, _ = json.Marshal(input)
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/platforms", bytes.NewBuffer(jsonValue))
+		req.Header.Set("Authorization", token)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"data\":{\"id\":\"([a-zA-Z0-9-]{36})\",\"name\":\"test\"},\"message\":\"Platform is successfully created\"}", w.Body.String())
+
+		// sing up user
+		inputR := models.RegisterModel{
+			Username: "test",
+			Email:    "test@test.com",
+			Password: "test",
+		}
+		jsonValue, _ = json.Marshal(inputR)
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/auth/signup", bytes.NewBuffer(jsonValue))
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, "{\"message\":\"Sign up was successful\"}", w.Body.String())
+
+		//login user
+		inputL = models.LoginModel{
+			Email:    "test@test.com",
+			Password: "test",
+		}
+		jsonValue, _ = json.Marshal(inputL)
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/auth/signin", bytes.NewBuffer(jsonValue))
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		assert.Regexp(t, "{\"message\":\"Sign up was successful\",\"token\":\"([a-zA-Z0-9-_.]{207})\"}", w.Body.String())
+		token = w.Body.String()[w.Body.Len()-209 : w.Body.Len()-2]
+
+		//create platform without permissions
+		input = models.Platform{
+			Name: "test2",
+		}
+		jsonValue, _ = json.Marshal(input)
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("POST", "/platforms", bytes.NewBuffer(jsonValue))
+		req.Header.Set("Authorization", token)
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 403, w.Code)
+		assert.Equal(t, "{\"error\":\"permission denied\"}", w.Body.String())
+
+		//get platforms
+		w = httptest.NewRecorder()
+		req, _ = http.NewRequest("GET", "/platforms", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
 		assert.Regexp(t, "\"name\":\"test\"}]}$", w.Body.String())

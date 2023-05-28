@@ -41,8 +41,8 @@ type Rating struct {
 }
 
 type Platform struct {
-	ID   uuid.UUID
-	Name string
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type PlatformsOnGames struct {
