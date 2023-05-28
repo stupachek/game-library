@@ -69,13 +69,15 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 
 	gameHandler := handler.NewGameHandler(gameService, publisherService, genreService, platformService)
 	games := r.Group("/games")
-	games.Use(middleware.Auth())
 	{
 		games.GET("", gameHandler.GetGamesList)
 		games.GET(":id", gameHandler.GetGame)
-		games.Use(middleware.CheckIfManager(&userHandler))
-		games.Use(middleware.DeleteFile(&gameHandler))
-		games.POST("", gameHandler.CreateGame)
+		{
+			games.Use(middleware.Auth())
+			games.Use(middleware.CheckIfManager(&userHandler))
+			games.Use(middleware.DeleteFile(&gameHandler))
+			games.POST("", gameHandler.CreateGame)
+		}
 	}
 
 	publisherHandler := handler.NewPublisherHandler(publisherService)
