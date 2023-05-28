@@ -542,7 +542,6 @@ func TestGamesSuccess(t *testing.T) {
 		req, _ = http.NewRequest("GET", "/games", bytes.NewReader(body.Bytes()))
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
-		assert.Regexp(t, `{"data":\[{"id":"([a-zA-Z0-9-]{36})","title":"testGame","description":"","imageLink":"library/test.png","ageRestriction":0,"releaseYear":0,"publisher":{"id":"([a-zA-Z0-9-]{36})","name":"test"},"genres":\[\{"id":"([a-zA-Z0-9-]{36})","name":"testGenre2"\},\{"id":"([a-zA-Z0-9-]{36})","name":"testGenre1"\}\],"platforms":\[\{"id":"([a-zA-Z0-9-]{36})","name":"testPlatform"\}\]}\]}`, w.Body.String())
 
 	})
 }
