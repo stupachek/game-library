@@ -61,6 +61,18 @@ jobs:
         ADMIN_EMAIL: admin@a.a
         ADMIN_USERNAME: admin
         ADMIN_PASSWORD: admin
+    - name: Api test
+      run: go test -p  1 ./... -tags=api_test
+      env: 
+        DB_HOST: localhost
+        DB_DRIVER: postgres
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_NAME: game_library
+        DB_PORT: 5432
+        ADMIN_EMAIL: admin@a.a
+        ADMIN_USERNAME: admin
+        ADMIN_PASSWORD: admin
       
   golangci:
     name: lint
