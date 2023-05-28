@@ -22,8 +22,8 @@ type InputGame struct {
 	PublisherId    string                `form:"publisherId" binding:"required"`
 	AgeRestriction int                   `form:"ageRestriction"`
 	ReleaseYear    int                   `form:"releaseYear"`
-	Genres         []string              `form:"genres"`
-	Platforms      []string              `form:"platforms"`
+	Genres         []string              `form:"genres" binding:"required"`
+	Platforms      []string              `form:"platforms" binding:"required"`
 }
 
 func (g *GameHandler) GetGamesList(c *gin.Context) {
@@ -65,7 +65,7 @@ func (g *GameHandler) fromStringToGenres(stringGenres []string) ([]models.Genre,
 	for i, genre := range stringGenres {
 		g, err := g.GenreService.GetGenre(genre)
 		if err != nil {
-			return []models.Genre{}, err
+			return []models.Genre{}, fmt.Errorf("unknown genre %s", genre)
 		}
 		genres[i] = g
 	}
@@ -77,7 +77,7 @@ func (g *GameHandler) fromStringToPlatform(stringPlatform []string) ([]models.Pl
 	for i, platform := range stringPlatform {
 		p, err := g.PlatformService.GetPlatform(platform)
 		if err != nil {
-			return []models.Platform{}, err
+			return []models.Platform{}, fmt.Errorf("unknown platform %s", platform)
 		}
 		plaforms[i] = p
 	}

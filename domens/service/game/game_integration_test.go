@@ -120,7 +120,7 @@ func TestCreateGet(t *testing.T) {
 		if err != nil {
 			t.Fatalf(" expected %v, got %v", nil, err)
 		}
-		if game1Get.ID != game1.ID {
+		if game1Get.ID != game1.ID.String() {
 			t.Fatalf(" expected %v, got %v", game1, game1Get)
 
 		}
