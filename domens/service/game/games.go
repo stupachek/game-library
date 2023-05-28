@@ -59,15 +59,16 @@ func (g *GameService) GetGame(idStr string) (models.Game, error) {
 	return game, nil
 }
 
-func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plaforms []models.Platform) error {
+func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plaforms []models.Platform) (models.Game, error) {
 	gameId, err := uuid.NewRandom()
 	if err != nil {
-		return err
+		return models.Game{}, err
 	}
 	game.ID = gameId
 	err = g.GameRepo.CreateGame(game)
 	if err != nil {
-		return err
+		return models.Game{}, err
+
 	}
 	for _, genre := range genres {
 		err := g.GenresOnGamesRepo.CreateGenresOnGames(
@@ -76,7 +77,7 @@ func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plafor
 				GenreId: genre.ID,
 			})
 		if err != nil {
-			return err
+			return models.Game{}, err
 		}
 	}
 	for _, plaform := range plaforms {
@@ -86,9 +87,10 @@ func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plafor
 				PlatformId: plaform.ID,
 			})
 		if err != nil {
-			return err
+			return models.Game{}, err
+
 		}
 	}
 
-	return nil
+	return game, nil
 }

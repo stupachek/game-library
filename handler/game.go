@@ -102,10 +102,10 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		return
 	}
 	c.Set("dst", dst)
-	//if _, err := g.PublisherService.GetPublisher(inputGame.PublisherId); err != nil {
-	//	_ = c.AbortWithError(http.StatusBadRequest, err)
-	//	return
-	//}
+	if _, err := g.PublisherService.GetPublisher(inputGame.PublisherId); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 	genres, err := g.fromStringToGenres(inputGame.Genres)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
@@ -122,10 +122,10 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		return
 	}
 	game := models.NewGame(publisherId, inputGame.Title, inputGame.Description, dst, inputGame.AgeRestriction, inputGame.ReleaseYear)
-	err = g.GameService.CreateGame(game, genres, plaforms)
+	game, err = g.GameService.CreateGame(game, genres, plaforms)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully created", "data": gin.H{"link": dst}})
+	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully created", "data": gin.H{"dameId": game.ID, "link": dst}})
 }

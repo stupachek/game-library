@@ -64,7 +64,7 @@ func TestCreateGame(t *testing.T) {
 	servive := NewGameService(repo, repo_g, repo_p)
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			err := servive.CreateGame(tc.game, tc.genres, tc.plaforms)
+			_, err := servive.CreateGame(tc.game, tc.genres, tc.plaforms)
 			if err != tc.expectedError {
 				t.Fatalf("%s. expected %v, got %v", tc.description, tc.expectedError, err)
 			}
