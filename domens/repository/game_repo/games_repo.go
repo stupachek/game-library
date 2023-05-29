@@ -81,7 +81,7 @@ func (p *PostgresGameRepo) GetGames(params models.QueryParams) ([]models.GameRes
     JOIN genres ON genresOnGames.genreId = genres.id
     JOIN platformsOnGames ON games.id = platformsOnGames.gameId
     JOIN platforms ON platformsOnGames.platformId = platforms.id
-    WHERE games.title LIKE $1
+    WHERE UPPER(games.title) LIKE UPPER($1)
     GROUP BY games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
              publishers.id, publishers.name
     LIMIT $2 OFFSET $3;
