@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"game-library/domens/models"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -48,13 +47,19 @@ func (g *GameHandler) GetGame(c *gin.Context) {
 
 func (g *GameHandler) GetImage(c *gin.Context) {
 	image := c.Param("impath")
-	fileBytes, err := ioutil.ReadFile("library/" + image)
+	fileBytes, err := os.ReadFile("library/" + image)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "unknown image"})
+		return
 	}
 	c.Writer.WriteHeader(http.StatusOK)
 	c.Writer.Header().Set("Content-Type", "image/png")
-	c.Writer.Write(fileBytes)
+	_, err = c.Writer.Write(fileBytes)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't write file"})
+		return
+
+	}
 
 }
 
