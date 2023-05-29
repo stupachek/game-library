@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -27,12 +28,17 @@ type InputGame struct {
 }
 
 func (g *GameHandler) GetGamesList(c *gin.Context) {
-	games, err := g.GameService.GetGamesList()
+	query, err := query(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "unknown query params"})
+		return
+	}
+	games, err := g.GameService.GetGamesList(query)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't get list games"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": games})
+	c.JSON(http.StatusOK, gin.H{"data": games, "meta": gin.H{"totalCount": len(games)}})
 }
 
 func (g *GameHandler) GetGame(c *gin.Context) {
@@ -147,4 +153,20 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully created", "data": gin.H{"gameId": game.ID, "link": dst}})
+}
+
+func query(ctx *gin.Context) (models.QueryParams, error) {
+	skip, err := strconv.ParseUint(ctx.DefaultQuery("skip", "0"), 10, 32)
+	if err != nil {
+		return models.QueryParams{}, err
+	}
+	take, err := strconv.ParseUint(ctx.DefaultQuery("take", "99999"), 10, 32)
+	if err != nil {
+		return models.QueryParams{}, err
+	}
+
+	return models.QueryParams{
+		Skip: skip,
+		Take: take,
+	}, nil
 }

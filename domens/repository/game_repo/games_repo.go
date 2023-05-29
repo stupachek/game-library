@@ -54,7 +54,7 @@ func (p *PostgresGameRepo) Migrate() error {
 	return err
 }
 
-func (t *TestGameRepo) GetGames() ([]models.GameRespons, error) {
+func (t *TestGameRepo) GetGames(params models.QueryParams) ([]models.GameRespons, error) {
 	games := make([]models.GameRespons, 0)
 	for _, game := range t.Games {
 		games = append(games, models.GameRespons{
@@ -69,7 +69,7 @@ func (t *TestGameRepo) GetGames() ([]models.GameRespons, error) {
 	return games, nil
 }
 
-func (p *PostgresGameRepo) GetGames() ([]models.GameRespons, error) {
+func (p *PostgresGameRepo) GetGames(params models.QueryParams) ([]models.GameRespons, error) {
 	rows, err := p.DB.Query(`SELECT games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
        publishers.id AS publishersId, publishers.name AS publishersName,
        ARRAY_AGG(DISTINCT jsonb_build_object('id', genres.id, 'name', genres.name) ) AS genres,
@@ -81,7 +81,8 @@ JOIN genres ON genresOnGames.genreId = genres.id
 JOIN platformsOnGames ON games.id = platformsOnGames.gameId
 JOIN platforms ON platformsOnGames.platformId = platforms.id
 GROUP BY games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
-         publishers.id, publishers.name;`)
+         publishers.id, publishers.name 
+LIMIT $1 OFFSET $2;`, params.Take, params.Skip)
 	if err != nil {
 		return nil, err
 	}
