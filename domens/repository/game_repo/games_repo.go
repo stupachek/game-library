@@ -163,6 +163,15 @@ func (p *PostgresGameRepo) UpdateGame(id uuid.UUID, game models.Game) error {
 	return err
 }
 
+func (p *PostgresGameRepo) DeleteGame(id uuid.UUID) error {
+	_, err := p.DB.Exec("DELETE FROM games WHERE id = $1", id)
+	return err
+}
+func (t *TestGameRepo) DeleteGame(id uuid.UUID) error {
+	delete(t.Games, id)
+	return nil
+}
+
 func (t *TestGameRepo) checkIfExist(game models.Game) error {
 	for _, g := range t.Games {
 		switch {

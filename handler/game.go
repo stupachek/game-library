@@ -229,3 +229,13 @@ func (g *GameHandler) UpdateGame(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully updated", "data": gin.H{"game": game.ID, "link": dst}})
 }
+
+func (g *GameHandler) DeleteGame(c *gin.Context) {
+	idStr := c.Param("id")
+	err := g.GameService.DeleteGame(idStr)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't delete game"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully deleted"})
+}

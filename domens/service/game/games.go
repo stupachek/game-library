@@ -18,7 +18,7 @@ type IGameRepo interface {
 	GetGameById(id uuid.UUID) (models.GameRespons, error)
 	GetGames(params models.QueryParams) ([]models.GameRespons, error)
 	UpdateGame(id uuid.UUID, game models.Game) error
-	//Delete(id uuid.UUID)
+	DeleteGame(id uuid.UUID) error
 }
 
 type IGenresOnGamesRepo interface {
@@ -136,4 +136,20 @@ func (g *GameService) UpdateGame(game models.Game, genres []models.Genre, plafor
 	}
 
 	return game, nil
+}
+
+func (g *GameService) DeleteGame(idStr string) error {
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return ErrParseId
+	}
+	game, err := g.GameRepo.GetGameById(id)
+	if err != nil {
+		return err
+	}
+	if game.ID == ("") {
+		return ErrUnknownId
+	}
+
+	return g.GameRepo.DeleteGame(id)
 }
