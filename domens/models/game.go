@@ -9,8 +9,9 @@ import (
 )
 
 type QueryParams struct {
-	Skip uint64
-	Take uint64
+	Skip        uint64
+	Take        uint64
+	SearchQuery string
 }
 
 type Game struct {

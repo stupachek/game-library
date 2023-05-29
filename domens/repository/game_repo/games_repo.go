@@ -70,19 +70,23 @@ func (t *TestGameRepo) GetGames(params models.QueryParams) ([]models.GameRespons
 }
 
 func (p *PostgresGameRepo) GetGames(params models.QueryParams) ([]models.GameRespons, error) {
-	rows, err := p.DB.Query(`SELECT games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
-       publishers.id AS publishersId, publishers.name AS publishersName,
-       ARRAY_AGG(DISTINCT jsonb_build_object('id', genres.id, 'name', genres.name) ) AS genres,
-       ARRAY_AGG(DISTINCT jsonb_build_object('id', platforms.id, 'name', platforms.name)) AS platforms
-FROM games
-JOIN publishers ON games.publisherId = publishers.id
-JOIN genresOnGames ON games.id = genresOnGames.gameId
-JOIN genres ON genresOnGames.genreId = genres.id
-JOIN platformsOnGames ON games.id = platformsOnGames.gameId
-JOIN platforms ON platformsOnGames.platformId = platforms.id
-GROUP BY games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
-         publishers.id, publishers.name 
-LIMIT $1 OFFSET $2;`, params.Take, params.Skip)
+	rows, err := p.DB.Query(`
+    SELECT games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
+           publishers.id AS publishersId, publishers.name AS publishersName,
+           ARRAY_AGG(DISTINCT jsonb_build_object('id', genres.id, 'name', genres.name)) AS genres,
+           ARRAY_AGG(DISTINCT jsonb_build_object('id', platforms.id, 'name', platforms.name)) AS platforms
+    FROM games
+    JOIN publishers ON games.publisherId = publishers.id
+    JOIN genresOnGames ON games.id = genresOnGames.gameId
+    JOIN genres ON genresOnGames.genreId = genres.id
+    JOIN platformsOnGames ON games.id = platformsOnGames.gameId
+    JOIN platforms ON platformsOnGames.platformId = platforms.id
+    WHERE games.title LIKE $1
+    GROUP BY games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
+             publishers.id, publishers.name
+    LIMIT $2 OFFSET $3;
+`, params.SearchQuery, params.Take, params.Skip)
+
 	if err != nil {
 		return nil, err
 	}

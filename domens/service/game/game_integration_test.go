@@ -127,8 +127,9 @@ func TestCreateGet(t *testing.T) {
 
 		//get games
 		games, err := gameService.GetGamesList(models.QueryParams{
-			Skip: 0,
-			Take: 99999,
+			Skip:        0,
+			Take:        99999,
+			SearchQuery: "%%",
 		})
 		if err != nil {
 			t.Fatalf(" expected %v, got %v", nil, err)

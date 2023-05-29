@@ -161,9 +161,12 @@ func query(ctx *gin.Context) (models.QueryParams, error) {
 		return models.QueryParams{}, err
 	}
 
+	searchQuery := ctx.DefaultQuery("searchQuery", "")
+
 	return models.QueryParams{
-		Skip: skip,
-		Take: take,
+		Skip:        skip,
+		Take:        take,
+		SearchQuery: "%" + searchQuery + "%",
 	}, nil
 }
 
