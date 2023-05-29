@@ -27,7 +27,7 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowAllOrigins: false,
 		AllowOrigins:    []string{"*"},
-		AllowMethods:    []string{"GET", "POST", "DELETE", "OPTINS"},
+		AllowMethods:    []string{"GET", "POST", "DELETE", "OPTINS", "PATCH"},
 		AllowHeaders:    []string{"*"},
 	}))
 	//TODO: move init repo and servise to main
@@ -77,8 +77,12 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 			games.Use(middleware.CheckIfManager(&userHandler))
 			games.Use(middleware.DeleteFile(&gameHandler))
 			games.POST("", gameHandler.CreateGame)
+			games.PATCH("/:id", gameHandler.UpdateGame)
+			games.DELETE("/:id", gameHandler.DeleteGame)
 		}
 	}
+	gameImage := r.Group("/image/library")
+	gameImage.GET("/:impath", gameHandler.GetImage)
 
 	publisherHandler := handler.NewPublisherHandler(publisherService)
 	publishers := r.Group("/publishers")
@@ -98,10 +102,13 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 	platforms := r.Group("/platforms")
 	{
 		platforms.GET("", platformHandler.GetPlatformsList)
+		platforms.GET("/:id", platformHandler.GetPlatform)
 		{
 			platforms.Use(middleware.Auth())
 			platforms.Use(middleware.CheckIfManager(&userHandler))
 			platforms.POST("", platformHandler.CreatePlatform)
+			platforms.PATCH("/:id", platformHandler.UpdatePlatform)
+			platforms.DELETE("/:id", platformHandler.DeletePlatform)
 		}
 	}
 
@@ -109,10 +116,13 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 	genres := r.Group("/genres")
 	{
 		genres.GET("", genreHandler.GetGenresList)
+		genres.GET("/:id", genreHandler.GetGenre)
 		{
 			genres.Use(middleware.Auth())
 			genres.Use(middleware.CheckIfManager(&userHandler))
 			genres.POST("", genreHandler.CreateGenre)
+			genres.PATCH("/:id", genreHandler.UpdateGenre)
+			genres.DELETE("/:id", genreHandler.DeleteGenre)
 		}
 	}
 	return r

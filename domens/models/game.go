@@ -8,6 +8,12 @@ import (
 	"github.com/lib/pq"
 )
 
+type QueryParams struct {
+	Skip        uint64
+	Take        uint64
+	SearchQuery string
+}
+
 type Game struct {
 	ID             uuid.UUID
 	PublisherId    uuid.UUID

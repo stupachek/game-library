@@ -531,7 +531,7 @@ func TestGamesSuccess(t *testing.T) {
 		req.Header.Set("Authorization", token)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
-		assert.Regexp(t, "{\"data\":{\"gameId\":\"([a-zA-Z0-9-]{36})\",\"link\":\"library/test.png\"},\"message\":\"Game is successfully created\"", w.Body.String())
+		assert.Regexp(t, "{\"data\":{\"gameId\":\"([a-zA-Z0-9-]{36})\",\"link\":\"http://localhost:8080/image/library/test.png\"},\"message\":\"Game is successfully created\"", w.Body.String())
 		err = os.Remove("library/test.png")
 		if err != nil {
 			t.Error(err)

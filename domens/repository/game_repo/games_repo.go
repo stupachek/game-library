@@ -54,7 +54,7 @@ func (p *PostgresGameRepo) Migrate() error {
 	return err
 }
 
-func (t *TestGameRepo) GetGames() ([]models.GameRespons, error) {
+func (t *TestGameRepo) GetGames(params models.QueryParams) ([]models.GameRespons, error) {
 	games := make([]models.GameRespons, 0)
 	for _, game := range t.Games {
 		games = append(games, models.GameRespons{
@@ -69,19 +69,24 @@ func (t *TestGameRepo) GetGames() ([]models.GameRespons, error) {
 	return games, nil
 }
 
-func (p *PostgresGameRepo) GetGames() ([]models.GameRespons, error) {
-	rows, err := p.DB.Query(`SELECT games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
-       publishers.id AS publishersId, publishers.name AS publishersName,
-       ARRAY_AGG(DISTINCT jsonb_build_object('id', genres.id, 'name', genres.name) ) AS genres,
-       ARRAY_AGG(DISTINCT jsonb_build_object('id', platforms.id, 'name', platforms.name)) AS platforms
-FROM games
-JOIN publishers ON games.publisherId = publishers.id
-JOIN genresOnGames ON games.id = genresOnGames.gameId
-JOIN genres ON genresOnGames.genreId = genres.id
-JOIN platformsOnGames ON games.id = platformsOnGames.gameId
-JOIN platforms ON platformsOnGames.platformId = platforms.id
-GROUP BY games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
-         publishers.id, publishers.name;`)
+func (p *PostgresGameRepo) GetGames(params models.QueryParams) ([]models.GameRespons, error) {
+	rows, err := p.DB.Query(`
+    SELECT games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
+           publishers.id AS publishersId, publishers.name AS publishersName,
+           ARRAY_AGG(DISTINCT jsonb_build_object('id', genres.id, 'name', genres.name)) AS genres,
+           ARRAY_AGG(DISTINCT jsonb_build_object('id', platforms.id, 'name', platforms.name)) AS platforms
+    FROM games
+    JOIN publishers ON games.publisherId = publishers.id
+    JOIN genresOnGames ON games.id = genresOnGames.gameId
+    JOIN genres ON genresOnGames.genreId = genres.id
+    JOIN platformsOnGames ON games.id = platformsOnGames.gameId
+    JOIN platforms ON platformsOnGames.platformId = platforms.id
+    WHERE UPPER(games.title) LIKE UPPER($1)
+    GROUP BY games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
+             publishers.id, publishers.name
+    LIMIT $2 OFFSET $3;
+`, params.SearchQuery, params.Take, params.Skip)
+
 	if err != nil {
 		return nil, err
 	}
@@ -143,9 +148,32 @@ func (t *TestGameRepo) CreateGame(game models.Game) error {
 	return nil
 }
 
+func (t *TestGameRepo) UpdateGame(id uuid.UUID, game models.Game) error {
+	if err := t.checkIfExist(game); err != nil {
+		return err
+	}
+	t.Games[id] = &game
+	return nil
+}
+
 func (p *PostgresGameRepo) CreateGame(game models.Game) error {
 	_, err := p.DB.Exec("INSERT INTO games(id, publisherId, title, description, imageLink, ageRestriction, releaseYear) values($1, $2, $3,  $4, $5, $6, $7)", game.ID, game.PublisherId, game.Title, game.Description, game.ImageLink, game.AgeRestriction, game.ReleaseYear)
 	return err
+}
+func (p *PostgresGameRepo) UpdateGame(id uuid.UUID, game models.Game) error {
+	_, err := p.DB.Exec("UPDATE games SET publisherId = $1, title = $2, description = $3, imageLink = $4, ageRestriction = $5, releaseYear = $6 WHERE id = $7",
+		game.PublisherId, game.Title, game.Description, game.ImageLink, game.AgeRestriction, game.ReleaseYear, id)
+
+	return err
+}
+
+func (p *PostgresGameRepo) DeleteGame(id uuid.UUID) error {
+	_, err := p.DB.Exec("DELETE FROM games WHERE id = $1", id)
+	return err
+}
+func (t *TestGameRepo) DeleteGame(id uuid.UUID) error {
+	delete(t.Games, id)
+	return nil
 }
 
 func (t *TestGameRepo) checkIfExist(game models.Game) error {

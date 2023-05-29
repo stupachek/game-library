@@ -32,14 +32,14 @@ CREATE TABLE IF NOT EXISTS games(
 
 CREATE TABLE IF NOT EXISTS genresOnGames(
         id SERIAL PRIMARY KEY ,
-		gameId UUID REFERENCES games(id),
-		genreId UUID REFERENCES genres(id)
+		gameId UUID REFERENCES games(id) ON DELETE CASCADE,
+		genreId UUID REFERENCES genres(id) ON DELETE CASCADE
     );
 
 CREATE TABLE IF NOT EXISTS platformsOnGames(
         id SERIAL PRIMARY KEY ,
-		gameId UUID REFERENCES games(id),
-		platformId UUID REFERENCES platforms(id)
+		gameId UUID REFERENCES games(id) ON DELETE CASCADE,
+		platformId UUID REFERENCES platforms(id) ON DELETE CASCADE
     );
 
 CREATE TABLE IF NOT EXISTS publishers(

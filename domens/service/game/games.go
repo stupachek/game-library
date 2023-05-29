@@ -16,17 +16,19 @@ type GameService struct {
 type IGameRepo interface {
 	CreateGame(game models.Game) error
 	GetGameById(id uuid.UUID) (models.GameRespons, error)
-	GetGames() ([]models.GameRespons, error)
-	//UpdateGame(id uuid.UUID, game models.Game) (models.Game, error)
-	//Delete(id uuid.UUID)
+	GetGames(params models.QueryParams) ([]models.GameRespons, error)
+	UpdateGame(id uuid.UUID, game models.Game) error
+	DeleteGame(id uuid.UUID) error
 }
 
 type IGenresOnGamesRepo interface {
 	CreateGenresOnGames(genresOnGames models.GenresOnGames) error
+	DeleteGenresOnGames(id uuid.UUID) error
 }
 
 type IPlatformsOnGamesRepo interface {
 	CreatePlatformsOnGames(PlatformsOnGames models.PlatformsOnGames) error
+	DeletePlatformsOnGames(id uuid.UUID) error
 }
 
 var ErrParseId = errors.New("can't parse id")
@@ -40,8 +42,8 @@ func NewGameService(gameRepo IGameRepo, genresOnGamesRepo IGenresOnGamesRepo, pl
 	}
 }
 
-func (g *GameService) GetGamesList() ([]models.GameRespons, error) {
-	return g.GameRepo.GetGames()
+func (g *GameService) GetGamesList(params models.QueryParams) ([]models.GameRespons, error) {
+	return g.GameRepo.GetGames(params)
 }
 
 func (g *GameService) GetGame(idStr string) (models.GameRespons, error) {
@@ -93,4 +95,61 @@ func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plafor
 	}
 
 	return game, nil
+}
+
+func (g *GameService) UpdateGame(game models.Game, genres []models.Genre, plaforms []models.Platform) (models.Game, error) {
+	err := g.GameRepo.UpdateGame(game.ID, game)
+	if err != nil {
+		return models.Game{}, err
+
+	}
+	err = g.GenresOnGamesRepo.DeleteGenresOnGames(game.ID)
+	if err != nil {
+		return models.Game{}, err
+
+	}
+	err = g.PlatformsOnGamesRepo.DeletePlatformsOnGames(game.ID)
+	if err != nil {
+		return models.Game{}, err
+
+	}
+	for _, genre := range genres {
+		err := g.GenresOnGamesRepo.CreateGenresOnGames(
+			models.GenresOnGames{
+				GameId:  game.ID,
+				GenreId: genre.ID,
+			})
+		if err != nil {
+			return models.Game{}, err
+		}
+	}
+	for _, plaform := range plaforms {
+		err := g.PlatformsOnGamesRepo.CreatePlatformsOnGames(
+			models.PlatformsOnGames{
+				GameId:     game.ID,
+				PlatformId: plaform.ID,
+			})
+		if err != nil {
+			return models.Game{}, err
+
+		}
+	}
+
+	return game, nil
+}
+
+func (g *GameService) DeleteGame(idStr string) error {
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return ErrParseId
+	}
+	game, err := g.GameRepo.GetGameById(id)
+	if err != nil {
+		return err
+	}
+	if game.ID == ("") {
+		return ErrUnknownId
+	}
+
+	return g.GameRepo.DeleteGame(id)
 }
