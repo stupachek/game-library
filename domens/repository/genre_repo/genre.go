@@ -2,11 +2,14 @@ package genre_repo
 
 import (
 	"database/sql"
+	"errors"
 	"game-library/domens/models"
 	"sync"
 
 	"github.com/google/uuid"
 )
+
+var ErrUpdateFailed error = errors.New("update failed")
 
 type TestGenreRepo struct {
 	Genres map[uuid.UUID]*models.Genre
@@ -40,22 +43,55 @@ func (p *PostgresGenreRepo) Migrate() error {
 	return err
 }
 
-func (t *TestGenreRepo) GetGenre(name string) (models.Genre, error) {
-	for _, genre := range t.Genres {
-		if genre.Name == name {
-			return *genre, nil
-		}
-	}
-	return models.Genre{}, nil
+func (t *TestGenreRepo) GetGenre(id uuid.UUID) (models.Genre, error) {
+	return *t.Genres[id], nil
 }
 
-func (p *PostgresGenreRepo) GetGenre(name string) (models.Genre, error) {
-	row := p.DB.QueryRow("SELECT id, name FROM genres WHERE name = $1", name)
+// func (p *PostgresGenreRepo) GetGenre(name string) (models.Genre, error) {
+// 	row := p.DB.QueryRow("SELECT id, name FROM genres WHERE name = $1", name)
+// 	var genre models.Genre
+// 	if err := row.Scan(&genre.ID, &genre.Name); err != nil {
+// 		return models.Genre{}, err
+// 	}
+// 	return genre, nil
+// }
+
+func (p *PostgresGenreRepo) GetGenre(id uuid.UUID) (models.Genre, error) {
+	row := p.DB.QueryRow("SELECT id, name FROM genres WHERE id = $1", id)
 	var genre models.Genre
 	if err := row.Scan(&genre.ID, &genre.Name); err != nil {
 		return models.Genre{}, err
 	}
 	return genre, nil
+}
+
+func (p *PostgresGenreRepo) UpdateGenre(id uuid.UUID, genre models.Genre) error {
+	res, err := p.DB.Exec("UPDATE genres SET name = $1 WHERE  id = $2", genre.Name, id)
+	if err != nil {
+		return err
+	}
+	r, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if r == 0 {
+		return ErrUpdateFailed
+	}
+	return nil
+}
+
+func (t *TestGenreRepo) UpdateGenre(id uuid.UUID, genre models.Genre) error {
+	t.Genres[id].Name = genre.Name
+	return nil
+}
+
+func (p *PostgresGenreRepo) Delete(id uuid.UUID) error {
+	_, err := p.DB.Exec("DELETE FROM genres WHERE id = $1", id)
+	return err
+}
+func (t *TestGenreRepo) Delete(id uuid.UUID) error {
+	delete(t.Genres, id)
+	return nil
 }
 
 func (t *TestGenreRepo) GetGenresList() ([]models.Genre, error) {
@@ -98,4 +134,22 @@ func (t *TestGenreRepo) Setup() {
 		ID:   uuid.UUID{111},
 		Name: "test",
 	}
+}
+
+func (t *TestGenreRepo) GetGenreByName(name string) (models.Genre, error) {
+	for _, genre := range t.Genres {
+		if genre.Name == name {
+			return *genre, nil
+		}
+	}
+	return models.Genre{}, nil
+}
+
+func (p *PostgresGenreRepo) GetGenreByName(name string) (models.Genre, error) {
+	row := p.DB.QueryRow("SELECT id, name FROM genres WHERE name = $1", name)
+	var genre models.Genre
+	if err := row.Scan(&genre.ID, &genre.Name); err != nil {
+		return models.Genre{}, err
+	}
+	return genre, nil
 }

@@ -46,8 +46,8 @@ func (p *PostgresPlatformRepo) Migrate() error {
 	return err
 }
 
-func (p *PostgresPlatformRepo) GetPlatform(name string) (models.Platform, error) {
-	row := p.DB.QueryRow("SELECT id, name FROM platforms WHERE name = $1", name)
+func (p *PostgresPlatformRepo) GetPlatform(id uuid.UUID) (models.Platform, error) {
+	row := p.DB.QueryRow("SELECT id, name FROM platforms WHERE id = $1", id)
 	var platform models.Platform
 	if err := row.Scan(&platform.ID, &platform.Name); err != nil {
 		return models.Platform{}, err
@@ -55,13 +55,8 @@ func (p *PostgresPlatformRepo) GetPlatform(name string) (models.Platform, error)
 	return platform, nil
 }
 
-func (t *TestPlatformRepo) GetPlatform(name string) (models.Platform, error) {
-	for _, Platform := range t.Platforms {
-		if Platform.Name == name {
-			return *Platform, nil
-		}
-	}
-	return models.Platform{}, nil
+func (t *TestPlatformRepo) GetPlatform(id uuid.UUID) (models.Platform, error) {
+	return *t.Platforms[id], nil
 }
 
 func (t *TestPlatformRepo) GetPlatformsList() ([]models.Platform, error) {
@@ -106,4 +101,51 @@ func (t *TestPlatformRepo) Setup() {
 		ID:   uuid.UUID{111},
 		Name: "test",
 	}
+}
+
+func (p *PostgresPlatformRepo) UpdatePlatform(id uuid.UUID, platform models.Platform) error {
+	res, err := p.DB.Exec("UPDATE platforms SET name = $1 WHERE  id = $2", platform.Name, id)
+	if err != nil {
+		return err
+	}
+	r, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if r == 0 {
+		return ErrUpdateFailed
+	}
+	return nil
+}
+
+func (t *TestPlatformRepo) UpdatePlatform(id uuid.UUID, platform models.Platform) error {
+	t.Platforms[id].Name = platform.Name
+	return nil
+}
+
+func (p *PostgresPlatformRepo) Delete(id uuid.UUID) error {
+	_, err := p.DB.Exec("DELETE FROM platforms WHERE id = $1", id)
+	return err
+}
+func (t *TestPlatformRepo) Delete(id uuid.UUID) error {
+	delete(t.Platforms, id)
+	return nil
+}
+
+func (p *PostgresPlatformRepo) GetPlatformByName(name string) (models.Platform, error) {
+	row := p.DB.QueryRow("SELECT id, name FROM platforms WHERE name = $1", name)
+	var platform models.Platform
+	if err := row.Scan(&platform.ID, &platform.Name); err != nil {
+		return models.Platform{}, err
+	}
+	return platform, nil
+}
+
+func (t *TestPlatformRepo) GetPlatformByName(name string) (models.Platform, error) {
+	for _, Platform := range t.Platforms {
+		if Platform.Name == name {
+			return *Platform, nil
+		}
+	}
+	return models.Platform{}, nil
 }

@@ -79,6 +79,8 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 			games.POST("", gameHandler.CreateGame)
 		}
 	}
+	gameImage := r.Group("/image")
+	gameImage.GET(":impath", gameHandler.GetImage)
 
 	publisherHandler := handler.NewPublisherHandler(publisherService)
 	publishers := r.Group("/publishers")
@@ -98,10 +100,13 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 	platforms := r.Group("/platforms")
 	{
 		platforms.GET("", platformHandler.GetPlatformsList)
+		platforms.GET("/:id", platformHandler.GetPlatform)
 		{
 			platforms.Use(middleware.Auth())
 			platforms.Use(middleware.CheckIfManager(&userHandler))
 			platforms.POST("", platformHandler.CreatePlatform)
+			platforms.PATCH("/:id", platformHandler.UpdatePlatform)
+			platforms.DELETE("/:id", platformHandler.DeletePlatform)
 		}
 	}
 
@@ -109,10 +114,13 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 	genres := r.Group("/genres")
 	{
 		genres.GET("", genreHandler.GetGenresList)
+		genres.GET("/:id", genreHandler.GetGenre)
 		{
 			genres.Use(middleware.Auth())
 			genres.Use(middleware.CheckIfManager(&userHandler))
 			genres.POST("", genreHandler.CreateGenre)
+			genres.PATCH("/:id", genreHandler.UpdateGenre)
+			genres.DELETE("/:id", genreHandler.DeleteGenre)
 		}
 	}
 	return r

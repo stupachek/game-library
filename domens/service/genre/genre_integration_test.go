@@ -63,7 +63,7 @@ func TestCreateGetGenres(t *testing.T) {
 		}
 
 		//get genre
-		genreTest, err := service.GetGenre("test")
+		genreTest, err := service.GetGenre(test1.ID.String())
 		if err != nil {
 			t.Fatalf("expected %v, got %v", nil, err)
 		}

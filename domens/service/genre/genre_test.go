@@ -51,7 +51,7 @@ func TestGetSucces(t *testing.T) {
 	service := NewGenreService(repo)
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			genre, err := service.GetGenre(tc.genre)
+			genre, err := service.GetGenreByName(tc.genre)
 			if err != tc.expectedError {
 				t.Fatalf("%s. expected %v, got %v", tc.description, tc.expectedError, err)
 			}

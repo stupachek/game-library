@@ -63,7 +63,7 @@ func TestCreateGetPlatforms(t *testing.T) {
 		}
 
 		//get platform
-		platformTest, err := service.GetPlatform("test")
+		platformTest, err := service.GetPlatform(test1.ID.String())
 		if err != nil {
 			t.Fatalf("expected %v, got %v", nil, err)
 		}

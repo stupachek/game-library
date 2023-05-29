@@ -51,7 +51,7 @@ func TestGetSucces(t *testing.T) {
 	service := NewPlatformService(repo)
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			platform, err := service.GetPlatform(tc.platform)
+			platform, err := service.GetPlatformByName(tc.platform)
 			if err != tc.expectedError {
 				t.Fatalf("%s. expected %v, got %v", tc.description, tc.expectedError, err)
 			}

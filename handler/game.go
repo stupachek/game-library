@@ -45,6 +45,21 @@ func (g *GameHandler) GetGame(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": game})
 }
 
+// TODO
+func (g *GameHandler) GetImage(c *gin.Context) {
+	idStr := c.Param("impath")
+	// game, err := g.GameService.GetGame(idStr)
+	// if err != nil {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't get game"})
+	// 	return
+	// }
+	// if game.ImageLink != idStr {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "bad request", "message": "received path is not equel path in game"})
+	// }
+	c.File("library/" + idStr)
+	c.Status(http.StatusOK)
+}
+
 func (g *GameHandler) UpdateGame(c *gin.Context) {
 	inputGame := InputGame{}
 	if err := c.ShouldBind(&inputGame); err != nil {
@@ -63,7 +78,7 @@ func (g *GameHandler) UpdateGame(c *gin.Context) {
 func (g *GameHandler) fromStringToGenres(stringGenres []string) ([]models.Genre, error) {
 	genres := make([]models.Genre, len(stringGenres))
 	for i, genre := range stringGenres {
-		g, err := g.GenreService.GetGenre(genre)
+		g, err := g.GenreService.GetGenreByName(genre)
 		if err != nil {
 			return []models.Genre{}, fmt.Errorf("unknown genre %s", genre)
 		}
@@ -75,7 +90,7 @@ func (g *GameHandler) fromStringToGenres(stringGenres []string) ([]models.Genre,
 func (g *GameHandler) fromStringToPlatform(stringPlatform []string) ([]models.Platform, error) {
 	plaforms := make([]models.Platform, len(stringPlatform))
 	for i, platform := range stringPlatform {
-		p, err := g.PlatformService.GetPlatform(platform)
+		p, err := g.PlatformService.GetPlatformByName(platform)
 		if err != nil {
 			return []models.Platform{}, fmt.Errorf("unknown platform %s", platform)
 		}
