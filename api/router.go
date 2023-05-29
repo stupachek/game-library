@@ -27,7 +27,7 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowAllOrigins: false,
 		AllowOrigins:    []string{"*"},
-		AllowMethods:    []string{"GET", "POST", "DELETE", "OPTINS"},
+		AllowMethods:    []string{"GET", "POST", "DELETE", "OPTINS", "PATCH"},
 		AllowHeaders:    []string{"*"},
 	}))
 	//TODO: move init repo and servise to main
