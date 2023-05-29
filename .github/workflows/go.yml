@@ -13,8 +13,31 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: game_library
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+        
     steps:
     - uses: actions/checkout@v3
+    - name: Install PostgreSQL client
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes postgresql-client
+    - name: Setup database
+      run: psql -h localhost -U root -d game_library -f ./sql/create_tables.sql
+      env:
+        PGPASSWORD: root
 
     - name: Set up Go
       uses: actions/setup-go@v3
@@ -24,8 +47,32 @@ jobs:
     - name: Build
       run: go build -v ./...
 
-    - name: Test
-      run: go test -v ./...
+    - name: Unit test
+      run: go test ./... -tags=unit_test
+    - name: Integration test
+      run: go test -p  1 ./... -tags=integration_test
+      env: 
+        DB_HOST: localhost
+        DB_DRIVER: postgres
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_NAME: game_library
+        DB_PORT: 5432
+        ADMIN_EMAIL: admin@a.a
+        ADMIN_USERNAME: admin
+        ADMIN_PASSWORD: admin
+    - name: Api test
+      run: go test -p  1 ./... -tags=api_test
+      env: 
+        DB_HOST: localhost
+        DB_DRIVER: postgres
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_NAME: game_library
+        DB_PORT: 5432
+        ADMIN_EMAIL: admin@a.a
+        ADMIN_USERNAME: admin
+        ADMIN_PASSWORD: admin
       
   golangci:
     name: lint

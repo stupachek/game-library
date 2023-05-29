@@ -10,6 +10,7 @@ var ErrDublicateIDModel error = errors.New("model with the ID already exist")
 
 type TestGenresOnGamesRepo struct {
 	GenresOnGames map[uint]*models.GenresOnGames
+	counter       uint
 }
 
 func NewTestGenresOnGamesRepo() *TestGenresOnGamesRepo {
@@ -41,10 +42,11 @@ func (p *PostgresGenresOnGamesRepo) Migrate() error {
 }
 
 func (t *TestGenresOnGamesRepo) CreateGenresOnGames(genresOnGames models.GenresOnGames) error {
-	if _, ok := t.GenresOnGames[genresOnGames.ID]; ok {
+	if _, ok := t.GenresOnGames[t.counter]; ok {
 		return ErrDublicateIDModel
 	}
 	t.GenresOnGames[genresOnGames.ID] = &genresOnGames
+	t.counter++
 	return nil
 }
 
@@ -55,6 +57,7 @@ func (p *PostgresGenresOnGamesRepo) CreateGenresOnGames(genresOnGames models.Gen
 
 type TestPlatformsOnGamesRepo struct {
 	PlatformsOnGames map[uint]*models.PlatformsOnGames
+	counter          uint
 }
 
 func NewTestPlatformsOnGamesRepo() *TestPlatformsOnGamesRepo {
@@ -86,10 +89,11 @@ func (p *PostgresPlatformsOnGamesRepo) Migrate() error {
 }
 
 func (t *TestPlatformsOnGamesRepo) CreatePlatformsOnGames(platformsOnGames models.PlatformsOnGames) error {
-	if _, ok := t.PlatformsOnGames[platformsOnGames.ID]; ok {
+	if _, ok := t.PlatformsOnGames[t.counter]; ok {
 		return ErrDublicateIDModel
 	}
 	t.PlatformsOnGames[platformsOnGames.ID] = &platformsOnGames
+	t.counter++
 	return nil
 }
 

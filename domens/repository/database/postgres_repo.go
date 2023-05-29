@@ -56,3 +56,12 @@ func ConnectDataBase() *sql.DB {
 	}
 	return DB
 }
+
+func ClearData(db *sql.DB) error {
+	_, err := db.Query("TRUNCATE TABLE  users, games, genres, platforms, publishers CASCADE;")
+	if err != nil {
+		return err
+	}
+	_, err = db.Query("INSERT INTO users(id, email, username, role, hashedPassword, badgeColor) values('699a5565-4c7e-4d18-be3e-ea04eb4f5e4d', 'admin@a.a', 'admin', 'admin', '$argon2id$v=19$m=65536,t=3,p=4$iZAGQSDhbte1+l0oF+rD/g$QWVeHaFYiR8iUA1BvK9+Pkua9EV3K/6y6CMTqSSet4Y', '' ) ON CONFLICT DO NOTHING;")
+	return err
+}

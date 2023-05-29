@@ -1,10 +1,13 @@
 package platform
 
 import (
+	"errors"
 	"game-library/domens/models"
 
 	"github.com/google/uuid"
 )
+
+var ErrUnknownPlatform error = errors.New("unknown platform")
 
 type IPlatformRepo interface {
 	GetPlatform(name string) (models.Platform, error)
@@ -23,7 +26,14 @@ func NewPlatformService(repo IPlatformRepo) PlatformService {
 }
 
 func (p *PlatformService) GetPlatform(name string) (models.Platform, error) {
-	return p.PlatformRepo.GetPlatform(name)
+	platform, err := p.PlatformRepo.GetPlatform(name)
+	if err != nil {
+		return models.Platform{}, err
+	}
+	if platform.ID == (uuid.UUID{}) {
+		return models.Platform{}, ErrUnknownPlatform
+	}
+	return platform, nil
 }
 
 func (p *PlatformService) GetPlatformsList() ([]models.Platform, error) {

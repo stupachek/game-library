@@ -15,8 +15,8 @@ type GameService struct {
 
 type IGameRepo interface {
 	CreateGame(game models.Game) error
-	GetGameById(id uuid.UUID) (models.Game, error)
-	GetGames() ([]models.Game, error)
+	GetGameById(id uuid.UUID) (models.GameRespons, error)
+	GetGames() ([]models.GameRespons, error)
 	//UpdateGame(id uuid.UUID, game models.Game) (models.Game, error)
 	//Delete(id uuid.UUID)
 }
@@ -40,34 +40,35 @@ func NewGameService(gameRepo IGameRepo, genresOnGamesRepo IGenresOnGamesRepo, pl
 	}
 }
 
-func (g *GameService) GetGamesList() ([]models.Game, error) {
+func (g *GameService) GetGamesList() ([]models.GameRespons, error) {
 	return g.GameRepo.GetGames()
 }
 
-func (g *GameService) GetGame(idStr string) (models.Game, error) {
+func (g *GameService) GetGame(idStr string) (models.GameRespons, error) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		return models.Game{}, ErrParseId
+		return models.GameRespons{}, ErrParseId
 	}
 	game, err := g.GameRepo.GetGameById(id)
 	if err != nil {
-		return models.Game{}, err
+		return models.GameRespons{}, err
 	}
-	if game.ID == (uuid.UUID{}) {
-		return models.Game{}, ErrUnknownId
+	if game.ID == ("") {
+		return models.GameRespons{}, ErrUnknownId
 	}
 	return game, nil
 }
 
-func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plaforms []models.Platform) error {
+func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plaforms []models.Platform) (models.Game, error) {
 	gameId, err := uuid.NewRandom()
 	if err != nil {
-		return err
+		return models.Game{}, err
 	}
 	game.ID = gameId
 	err = g.GameRepo.CreateGame(game)
 	if err != nil {
-		return err
+		return models.Game{}, err
+
 	}
 	for _, genre := range genres {
 		err := g.GenresOnGamesRepo.CreateGenresOnGames(
@@ -76,7 +77,7 @@ func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plafor
 				GenreId: genre.ID,
 			})
 		if err != nil {
-			return err
+			return models.Game{}, err
 		}
 	}
 	for _, plaform := range plaforms {
@@ -86,9 +87,10 @@ func (g *GameService) CreateGame(game models.Game, genres []models.Genre, plafor
 				PlatformId: plaform.ID,
 			})
 		if err != nil {
-			return err
+			return models.Game{}, err
+
 		}
 	}
 
-	return nil
+	return game, nil
 }

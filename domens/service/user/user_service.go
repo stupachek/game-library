@@ -3,10 +3,7 @@ package user
 import (
 	"errors"
 	"game-library/domens/models"
-	repository "game-library/domens/repository/user_repo"
 	"game-library/domens/service/jwt"
-	"log"
-	"os"
 
 	"github.com/google/uuid"
 	"github.com/matthewhartstonge/argon2"
@@ -15,47 +12,27 @@ import (
 var (
 	ErrUnauthenticated = errors.New("unauthenticated")
 	ErrAdmin           = errors.New("setup admin error")
+	ErrUnknownUUID     = errors.New("can't parse user id")
+	ErrUnknownRole     = errors.New("unknown role")
 )
 
-type UserService struct {
-	UserRepo repository.IUserRepo
+type IUserRepo interface {
+	CreateUser(models.User) error
+	GetUserByEmail(email string) (models.User, error)
+	GetUserById(id uuid.UUID) (*models.User, error)
+	GetUsers() ([]models.User, error)
+	UpdateRole(id uuid.UUID, role string) error
+	Delete(id uuid.UUID) error
 }
 
-func NewUserService(repo repository.IUserRepo) UserService {
+type UserService struct {
+	UserRepo IUserRepo
+}
+
+func NewUserService(repo IUserRepo) UserService {
 	return UserService{
 		UserRepo: repo,
 	}
-}
-
-func (u *UserService) SetupAdmin() error {
-	ADMIN_EMAIL, ok := os.LookupEnv("ADMIN_EMAIL")
-	if !ok {
-		log.Fatal("please specify ADMIN_EMAIL")
-	}
-	ADMIN_USERNAME, ok := os.LookupEnv("ADMIN_USERNAME")
-	if !ok {
-		log.Fatal("please specify ADMIN_USERNAME")
-	}
-	ADMIN_PASSWORD, ok := os.LookupEnv("ADMIN_PASSWORD")
-	if !ok {
-		log.Fatal("please specify ADMIN_PASSWORD")
-	}
-	hashedPassword, err := newPassword(ADMIN_PASSWORD)
-	if err != nil {
-		return ErrAdmin
-	}
-	user := models.User{
-		Email:          ADMIN_EMAIL,
-		Username:       ADMIN_USERNAME,
-		HashedPassword: hashedPassword,
-		Role:           models.ADMIN,
-	}
-	user.ID, err = uuid.NewRandom()
-	if err != nil {
-		return ErrAdmin
-	}
-	err = u.UserRepo.CreateAdmin(user)
-	return err
 }
 
 func (u *UserService) Register(registerUser models.RegisterModel) error {
@@ -80,7 +57,7 @@ func (u *UserService) Register(registerUser models.RegisterModel) error {
 func (u *UserService) Login(loginUser models.LoginModel) (string, error) {
 	user, err := u.UserRepo.GetUserByEmail(loginUser.Email)
 	if err != nil {
-		return "", err
+		return "", ErrUnauthenticated
 	}
 	ok, err := argon2.VerifyEncoded([]byte(loginUser.Password), []byte(user.HashedPassword))
 	if err != nil || !ok {
@@ -92,7 +69,7 @@ func (u *UserService) Login(loginUser models.LoginModel) (string, error) {
 func (u *UserService) GetUser(idStr string) (models.User, error) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		return models.User{}, errors.New("can't parse user id")
+		return models.User{}, ErrUnknownUUID
 	}
 	user, err := u.UserRepo.GetUserById(id)
 	if err != nil {
@@ -104,7 +81,7 @@ func (u *UserService) GetUser(idStr string) (models.User, error) {
 func (u *UserService) DeleteUser(idStr string) error {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		return errors.New("can't parse user id")
+		return ErrUnknownUUID
 	}
 	if _, err := u.UserRepo.GetUserById(id); err != nil {
 		return err
@@ -123,7 +100,7 @@ func (u *UserService) GetUsers() ([]models.User, error) {
 func (u *UserService) ChangeRole(idStr string, role string) (models.User, error) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		return models.User{}, errors.New("can't parse user id")
+		return models.User{}, ErrUnknownUUID
 	}
 	var user models.User
 	switch role {
@@ -137,13 +114,14 @@ func (u *UserService) ChangeRole(idStr string, role string) (models.User, error)
 		}
 		user = *userP
 	default:
-		return models.User{}, errors.New("unknown role")
+		return models.User{}, ErrUnknownRole
 	}
 	return user, nil
 }
 
 func newPassword(password string) (string, error) {
 	argon := argon2.DefaultConfig()
+	argon.MemoryCost = 32 * 1024
 
 	hashedPasword, err := argon.HashEncoded([]byte(password))
 	if err != nil {

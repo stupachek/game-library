@@ -1,11 +1,13 @@
 package genre
 
 import (
-	"fmt"
+	"errors"
 	"game-library/domens/models"
 
 	"github.com/google/uuid"
 )
+
+var ErrUnknownGenre error = errors.New("unknown genre")
 
 type IGenreRepo interface {
 	GetGenre(name string) (models.Genre, error)
@@ -29,7 +31,7 @@ func (g *GenreService) GetGenre(name string) (models.Genre, error) {
 		return models.Genre{}, err
 	}
 	if genre.ID == (uuid.UUID{}) {
-		return models.Genre{}, fmt.Errorf("unknown genre: %s", name)
+		return models.Genre{}, ErrUnknownGenre
 	}
 	return genre, nil
 }

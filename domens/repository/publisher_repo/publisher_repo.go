@@ -143,3 +143,10 @@ func (p *PostgresPublisherRepo) Delete(id uuid.UUID) error {
 	}
 	return nil
 }
+
+func (t *TestPublisherRepo) Setup() {
+	t.Publishers[uuid.UUID{111}] = &models.Publisher{
+		ID:   uuid.UUID{111},
+		Name: "test",
+	}
+}

@@ -8,7 +8,7 @@ import (
 )
 
 var (
-// ErrPublisher = errors.New("error on publisher create")
+	ErrPublisherId = errors.New("can't parse publisher id")
 )
 
 type IPublisherRepo interface {
@@ -46,7 +46,7 @@ func (p *PublisherService) CreatePublisher(publisherModel models.PublisherModel)
 func (p *PublisherService) UpdatePublisher(idStr string, publisherModel models.PublisherModel) (models.Publisher, error) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		return models.Publisher{}, errors.New("can't parse publisher id")
+		return models.Publisher{}, ErrPublisherId
 	}
 	err = p.PublisherRepo.UpdatePublisher(id, publisherModel)
 	if err != nil {
@@ -62,7 +62,7 @@ func (p *PublisherService) UpdatePublisher(idStr string, publisherModel models.P
 func (p *PublisherService) GetPublisher(idStr string) (models.Publisher, error) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		return models.Publisher{}, errors.New("can't parse publisher id")
+		return models.Publisher{}, ErrPublisherId
 	}
 	publisher, err := p.PublisherRepo.GetPublisherById(id)
 	if err != nil {
@@ -74,7 +74,7 @@ func (p *PublisherService) GetPublisher(idStr string) (models.Publisher, error) 
 func (p *PublisherService) DeletePublisher(idStr string) error {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		return errors.New("can't parse publisher id")
+		return ErrPublisherId
 	}
 	if _, err := p.PublisherRepo.GetPublisherById(id); err != nil {
 		return err

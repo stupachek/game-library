@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 var (
@@ -53,24 +54,42 @@ func (p *PostgresGameRepo) Migrate() error {
 	return err
 }
 
-func (t *TestGameRepo) GetGames() ([]models.Game, error) {
-	games := make([]models.Game, 0)
+func (t *TestGameRepo) GetGames() ([]models.GameRespons, error) {
+	games := make([]models.GameRespons, 0)
 	for _, game := range t.Games {
-		games = append(games, *game)
+		games = append(games, models.GameRespons{
+			ID:             game.ID.String(),
+			Title:          game.Title,
+			Description:    game.Description,
+			ImageLink:      game.ImageLink,
+			AgeRestriction: game.AgeRestriction,
+			ReleaseYear:    game.ReleaseYear,
+		})
 	}
 	return games, nil
 }
 
-func (p *PostgresGameRepo) GetGames() ([]models.Game, error) {
-	rows, err := p.DB.Query("SELECT id, PublisherId, Title,Description, ImageLink, AgeRestriction,   ReleaseYear, UpdatedAt FROM games")
+func (p *PostgresGameRepo) GetGames() ([]models.GameRespons, error) {
+	rows, err := p.DB.Query(`SELECT games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
+       publishers.id AS publishersId, publishers.name AS publishersName,
+       ARRAY_AGG(DISTINCT jsonb_build_object('id', genres.id, 'name', genres.name) ) AS genres,
+       ARRAY_AGG(DISTINCT jsonb_build_object('id', platforms.id, 'name', platforms.name)) AS platforms
+FROM games
+JOIN publishers ON games.publisherId = publishers.id
+JOIN genresOnGames ON games.id = genresOnGames.gameId
+JOIN genres ON genresOnGames.genreId = genres.id
+JOIN platformsOnGames ON games.id = platformsOnGames.gameId
+JOIN platforms ON platformsOnGames.platformId = platforms.id
+GROUP BY games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
+         publishers.id, publishers.name;`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var games []models.Game
+	var games []models.GameRespons
 	for rows.Next() {
-		var game models.Game
-		if err := rows.Scan(&game.ID, &game.PublisherId, &game.Title, &game.Description, &game.ImageLink, &game.AgeRestriction, &game.ReleaseYear, &game.UpdatedAt); err != nil {
+		var game models.GameRespons
+		if err := rows.Scan(&game.ID, &game.Title, &game.Description, &game.ImageLink, &game.AgeRestriction, &game.ReleaseYear, &game.Publisher.ID, &game.Publisher.Name, pq.Array(&game.Genres), pq.Array(&game.Platform)); err != nil {
 			return nil, err
 		}
 		games = append(games, game)
@@ -78,21 +97,40 @@ func (p *PostgresGameRepo) GetGames() ([]models.Game, error) {
 	return games, nil
 }
 
-func (t *TestGameRepo) GetGameById(id uuid.UUID) (models.Game, error) {
+func (t *TestGameRepo) GetGameById(id uuid.UUID) (models.GameRespons, error) {
 	for _, game := range t.Games {
 		if game.ID == id {
-			return *game, nil
+			return models.GameRespons{
+				ID:             game.ID.String(),
+				Title:          game.Title,
+				Description:    game.Description,
+				ImageLink:      game.ImageLink,
+				AgeRestriction: game.AgeRestriction,
+				ReleaseYear:    game.ReleaseYear,
+			}, nil
 		}
 	}
-	return models.Game{}, nil
+	return models.GameRespons{}, nil
 }
 
-func (p *PostgresGameRepo) GetGameById(id uuid.UUID) (models.Game, error) {
-	row := p.DB.QueryRow("SELECT id, PublisherId, Title,Description, ImageLink, AgeRestriction,   ReleaseYear, UpdatedAt  FROM games WHERE id = $1", id)
+func (p *PostgresGameRepo) GetGameById(id uuid.UUID) (models.GameRespons, error) {
+	row := p.DB.QueryRow(`SELECT games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
+       publishers.id AS publishersId, publishers.name AS publishersName,
+       ARRAY_AGG(DISTINCT jsonb_build_object('id', genres.id, 'name', genres.name)) AS genres,
+       ARRAY_AGG(DISTINCT jsonb_build_object('id', platforms.id, 'name', platforms.name)) AS platforms
+FROM games 
+JOIN publishers ON games.publisherId = publishers.id 
+JOIN genresOnGames ON games.id = genresOnGames.gameId 
+JOIN genres ON genresOnGames.genreId = genres.id 
+JOIN platformsOnGames ON games.id = platformsOnGames.gameId 
+JOIN platforms ON platformsOnGames.platformId = platforms.id 
+WHERE games.id = $1 
+GROUP BY games.id, games.title, games.description, games.imagelink, games.ageRestriction, games.releaseYear,
+         publishers.id, publishers.name;`, id)
 
-	var game models.Game
-	if err := row.Scan(&game.ID, &game.PublisherId, &game.Title, &game.Description, &game.ImageLink, &game.AgeRestriction, &game.ReleaseYear, &game.UpdatedAt); err != nil {
-		return models.Game{}, err
+	var game models.GameRespons
+	if err := row.Scan(&game.ID, &game.Title, &game.Description, &game.ImageLink, &game.AgeRestriction, &game.ReleaseYear, &game.Publisher.ID, &game.Publisher.Name, pq.Array(&game.Genres), pq.Array(&game.Platform)); err != nil {
+		return models.GameRespons{}, err
 	}
 	return game, nil
 }
@@ -120,4 +158,16 @@ func (t *TestGameRepo) checkIfExist(game models.Game) error {
 		}
 	}
 	return nil
+}
+
+func (t *TestGameRepo) Setup() {
+	t.Games[uuid.UUID{111}] = &models.Game{
+		ID:             [16]byte{111},
+		PublisherId:    [16]byte{123},
+		Title:          "test",
+		Description:    "test",
+		ImageLink:      "test",
+		AgeRestriction: 12,
+		ReleaseYear:    2012,
+	}
 }

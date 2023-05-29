@@ -2,7 +2,7 @@ package api
 
 import (
 	"crypto/ed25519"
-	"game-library/domens/repository/database"
+	"database/sql"
 	"game-library/domens/repository/game_repo"
 	"game-library/domens/repository/genre_repo"
 	"game-library/domens/repository/platform_repo"
@@ -18,13 +18,19 @@ import (
 	"game-library/middleware"
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(DB *sql.DB) *gin.Engine {
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowAllOrigins: false,
+		AllowOrigins:    []string{"*"},
+		AllowMethods:    []string{"GET", "POST", "DELETE", "OPTINS"},
+		AllowHeaders:    []string{"*"},
+	}))
 	//TODO: move init repo and servise to main
-	DB := database.ConnectDataBase()
 	userRepo := user_repo.NewPostgresUserRepo(DB)
 	gameRepo := game_repo.NewPostgresGameRepo(DB)
 	publisherRepo := publisher_repo.NewPostgresPublisherRepo(DB)
@@ -49,11 +55,11 @@ func SetupRouter() *gin.Engine {
 		auth.POST("/signin", userHandler.Login)
 	}
 	users := r.Group("/users")
-	users.Use(middleware.Auth())
 	{
-		users.GET("/me", userHandler.GetUser)
 		users.GET("/:id", userHandler.GetUser)
 		users.GET("", userHandler.GetUsers)
+		users.Use(middleware.Auth())
+		users.GET("/me", userHandler.GetUser)
 		{
 			users.Use(middleware.CheckIfAdmin(&userHandler))
 			users.PATCH("/:id", userHandler.ChangerRole)
@@ -63,13 +69,15 @@ func SetupRouter() *gin.Engine {
 
 	gameHandler := handler.NewGameHandler(gameService, publisherService, genreService, platformService)
 	games := r.Group("/games")
-	games.Use(middleware.Auth())
 	{
 		games.GET("", gameHandler.GetGamesList)
 		games.GET(":id", gameHandler.GetGame)
-		games.Use(middleware.CheckIfManager(&userHandler))
-		games.Use(middleware.DeleteFile(&gameHandler))
-		games.POST("", gameHandler.CreateGame)
+		{
+			games.Use(middleware.Auth())
+			games.Use(middleware.CheckIfManager(&userHandler))
+			games.Use(middleware.DeleteFile(&gameHandler))
+			games.POST("", gameHandler.CreateGame)
+		}
 	}
 
 	publisherHandler := handler.NewPublisherHandler(publisherService)
@@ -79,6 +87,7 @@ func SetupRouter() *gin.Engine {
 		publishers.GET("/:id", publisherHandler.GetPublisher)
 		{
 			publishers.Use(middleware.Auth())
+			publishers.Use(middleware.CheckIfManager(&userHandler))
 			publishers.POST("", publisherHandler.CreatePublisher)
 			publishers.PATCH("/:id", publisherHandler.UpdatePublisher)
 			publishers.DELETE("/:id", publisherHandler.DeletePublisher)
@@ -91,6 +100,7 @@ func SetupRouter() *gin.Engine {
 		platforms.GET("", platformHandler.GetPlatformsList)
 		{
 			platforms.Use(middleware.Auth())
+			platforms.Use(middleware.CheckIfManager(&userHandler))
 			platforms.POST("", platformHandler.CreatePlatform)
 		}
 	}
@@ -101,6 +111,7 @@ func SetupRouter() *gin.Engine {
 		genres.GET("", genreHandler.GetGenresList)
 		{
 			genres.Use(middleware.Auth())
+			genres.Use(middleware.CheckIfManager(&userHandler))
 			genres.POST("", genreHandler.CreateGenre)
 		}
 	}
