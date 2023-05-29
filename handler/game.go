@@ -141,7 +141,7 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusBadRequest, errors.New("can't parse publisherId id"))
 		return
 	}
-	dst = fmt.Sprintf("http://localhost:8080/image/library/%s", filepath.Base(file.Filename))
+	dst = fmt.Sprintf("https://game-library-docker.onrender.com/image/library/%s", filepath.Base(file.Filename))
 	game := models.NewGame(publisherId, inputGame.Title, inputGame.Description, dst, inputGame.AgeRestriction, inputGame.ReleaseYear)
 	game, err = g.GameService.CreateGame(game, genres, plaforms)
 	if err != nil {
