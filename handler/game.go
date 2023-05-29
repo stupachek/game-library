@@ -27,6 +27,17 @@ type InputGame struct {
 	Platforms      []string              `form:"platforms" binding:"required"`
 }
 
+type UpdateGame struct {
+	Title          string                `form:"title" binding:"required"`
+	Description    string                `form:"description"`
+	File           *multipart.FileHeader `form:"file"`
+	PublisherId    string                `form:"publisherId" binding:"required"`
+	AgeRestriction int                   `form:"ageRestriction"`
+	ReleaseYear    int                   `form:"releaseYear"`
+	Genres         []string              `form:"genres" binding:"required"`
+	Platforms      []string              `form:"platforms" binding:"required"`
+}
+
 func (g *GameHandler) GetGamesList(c *gin.Context) {
 	query, err := query(c)
 	if err != nil {
@@ -65,21 +76,6 @@ func (g *GameHandler) GetImage(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't write file"})
 		return
 
-	}
-
-}
-
-func (g *GameHandler) UpdateGame(c *gin.Context) {
-	inputGame := InputGame{}
-	if err := c.ShouldBind(&inputGame); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't update game"})
-		return
-	}
-	file := inputGame.File
-	dst := fmt.Sprintf("library/%s", filepath.Base(file.Filename))
-	if err := c.SaveUploadedFile(file, dst); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
 	}
 
 }
@@ -169,4 +165,67 @@ func query(ctx *gin.Context) (models.QueryParams, error) {
 		Skip: skip,
 		Take: take,
 	}, nil
+}
+
+func (g *GameHandler) UpdateGame(c *gin.Context) {
+	inputGame := UpdateGame{}
+	if err := c.ShouldBind(&inputGame); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't parse input"})
+		return
+	}
+	idStr := c.Param("id")
+	gameR, err := g.GameService.GetGame(idStr)
+	id, _ := uuid.Parse(idStr)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't get game"})
+		return
+	}
+	if _, err := g.PublisherService.GetPublisher(inputGame.PublisherId); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	genres, err := g.fromStringToGenres(inputGame.Genres)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	plaforms, err := g.fromStringToPlatform(inputGame.Platforms)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	publisherId, err := uuid.Parse(inputGame.PublisherId)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, errors.New("can't parse publisherId id"))
+		return
+	}
+	if _, err := g.PublisherService.GetPublisher(publisherId.String()); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, errors.New("unknown publisher"))
+		return
+	}
+	file := inputGame.File
+	dst := ""
+	if file == nil {
+		dst = gameR.ImageLink
+	} else {
+		dst = fmt.Sprintf("library/%s", filepath.Base(file.Filename))
+		if _, err := os.Stat(dst); err == nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, ErrFileExists)
+			return
+		}
+		if err := c.SaveUploadedFile(file, dst); err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't save file"})
+			return
+		}
+		c.Set("dst", dst)
+		dst = fmt.Sprintf("http://localhost:8080/image/library/%s", filepath.Base(file.Filename))
+	}
+	game := models.NewGame(publisherId, inputGame.Title, inputGame.Description, dst, inputGame.AgeRestriction, inputGame.ReleaseYear)
+	game.ID = id
+	game, err = g.GameService.UpdateGame(game, genres, plaforms)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Game is successfully updated", "data": gin.H{"game": game.ID, "link": dst}})
 }

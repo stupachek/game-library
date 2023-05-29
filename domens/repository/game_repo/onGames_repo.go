@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"game-library/domens/models"
+
+	"github.com/google/uuid"
 )
 
 var ErrDublicateIDModel error = errors.New("model with the ID already exist")
@@ -100,4 +102,32 @@ func (t *TestPlatformsOnGamesRepo) CreatePlatformsOnGames(platformsOnGames model
 func (p *PostgresPlatformsOnGamesRepo) CreatePlatformsOnGames(platformsOnGames models.PlatformsOnGames) error {
 	_, err := p.DB.Exec("INSERT INTO platformsOnGames(gameId, platformId) values($1, $2)", platformsOnGames.GameId, platformsOnGames.PlatformId)
 	return err
+}
+
+func (p *PostgresGenresOnGamesRepo) DeleteGenresOnGames(id uuid.UUID) error {
+	_, err := p.DB.Exec("DELETE FROM GenresOnGames WHERE gameId  = $1", id)
+	return err
+}
+
+func (t *TestGenresOnGamesRepo) DeleteGenresOnGames(id uuid.UUID) error {
+	for k, i := range t.GenresOnGames {
+		if i.GameId == id {
+			delete(t.GenresOnGames, k)
+		}
+	}
+	return nil
+}
+
+func (p *PostgresPlatformsOnGamesRepo) DeletePlatformsOnGames(id uuid.UUID) error {
+	_, err := p.DB.Exec("DELETE FROM PlatformsOnGames WHERE gameId  = $1", id)
+	return err
+}
+
+func (t *TestPlatformsOnGamesRepo) DeletePlatformsOnGames(id uuid.UUID) error {
+	for k, i := range t.PlatformsOnGames {
+		if i.GameId == id {
+			delete(t.PlatformsOnGames, k)
+		}
+	}
+	return nil
 }

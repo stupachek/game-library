@@ -144,8 +144,22 @@ func (t *TestGameRepo) CreateGame(game models.Game) error {
 	return nil
 }
 
+func (t *TestGameRepo) UpdateGame(id uuid.UUID, game models.Game) error {
+	if err := t.checkIfExist(game); err != nil {
+		return err
+	}
+	t.Games[id] = &game
+	return nil
+}
+
 func (p *PostgresGameRepo) CreateGame(game models.Game) error {
 	_, err := p.DB.Exec("INSERT INTO games(id, publisherId, title, description, imageLink, ageRestriction, releaseYear) values($1, $2, $3,  $4, $5, $6, $7)", game.ID, game.PublisherId, game.Title, game.Description, game.ImageLink, game.AgeRestriction, game.ReleaseYear)
+	return err
+}
+func (p *PostgresGameRepo) UpdateGame(id uuid.UUID, game models.Game) error {
+	_, err := p.DB.Exec("UPDATE games SET publisherId = $1, title = $2, description = $3, imageLink = $4, ageRestriction = $5, releaseYear = $6 WHERE id = $7",
+		game.PublisherId, game.Title, game.Description, game.ImageLink, game.AgeRestriction, game.ReleaseYear, id)
+
 	return err
 }
 

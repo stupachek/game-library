@@ -77,6 +77,7 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 			games.Use(middleware.CheckIfManager(&userHandler))
 			games.Use(middleware.DeleteFile(&gameHandler))
 			games.POST("", gameHandler.CreateGame)
+			games.PATCH("/:id", gameHandler.UpdateGame)
 		}
 	}
 	gameImage := r.Group("/image/library")
