@@ -79,8 +79,8 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 			games.POST("", gameHandler.CreateGame)
 		}
 	}
-	gameImage := r.Group("/image")
-	gameImage.GET(":impath", gameHandler.GetImage)
+	gameImage := r.Group("/image/library")
+	gameImage.GET("/:impath", gameHandler.GetImage)
 
 	publisherHandler := handler.NewPublisherHandler(publisherService)
 	publishers := r.Group("/publishers")

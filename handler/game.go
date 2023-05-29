@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"game-library/domens/models"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -45,19 +46,16 @@ func (g *GameHandler) GetGame(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": game})
 }
 
-// TODO
 func (g *GameHandler) GetImage(c *gin.Context) {
-	idStr := c.Param("impath")
-	// game, err := g.GameService.GetGame(idStr)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "can't get game"})
-	// 	return
-	// }
-	// if game.ImageLink != idStr {
-	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "bad request", "message": "received path is not equel path in game"})
-	// }
-	c.File("library/" + idStr)
-	c.Status(http.StatusOK)
+	image := c.Param("impath")
+	fileBytes, err := ioutil.ReadFile("library/" + image)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "unknown image"})
+	}
+	c.Writer.WriteHeader(http.StatusOK)
+	c.Writer.Header().Set("Content-Type", "image/png")
+	c.Writer.Write(fileBytes)
+
 }
 
 func (g *GameHandler) UpdateGame(c *gin.Context) {
@@ -136,6 +134,7 @@ func (g *GameHandler) CreateGame(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusBadRequest, errors.New("can't parse publisherId id"))
 		return
 	}
+	dst = fmt.Sprintf("http://localhost:8080/image/library/%s", filepath.Base(file.Filename))
 	game := models.NewGame(publisherId, inputGame.Title, inputGame.Description, dst, inputGame.AgeRestriction, inputGame.ReleaseYear)
 	game, err = g.GameService.CreateGame(game, genres, plaforms)
 	if err != nil {
