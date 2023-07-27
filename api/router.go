@@ -27,7 +27,6 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 	r.Use(cors.New(cors.Config{
 		AllowAllOrigins:  true,
 		AllowCredentials: true,
-		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS", "PATCH"},
 		AllowHeaders:     []string{"*"},
 	}))
