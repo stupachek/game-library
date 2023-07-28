@@ -28,7 +28,8 @@ func SetupRouter(DB *sql.DB) *gin.Engine {
 		AllowAllOrigins:  true,
 		AllowCredentials: true,
 		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS", "PATCH", "FETCH"},
-		AllowHeaders:     []string{"Access-Control-Allow-Origin", "Content-Type", "application/json"},
+		AllowHeaders:     []string{"Access-Control-Allow-Origin", "Content-Type", "application/json", "content-type", "Origin"},
+		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Content-Type", "application/json", "content-type", "Origin"},
 	}))
 	//TODO: move init repo and servise to main
 	userRepo := user_repo.NewPostgresUserRepo(DB)
