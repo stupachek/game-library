@@ -2,9 +2,9 @@
 
 Game Library is an application where users can find information about games they are interested in. Users will be able to see a list of games, apply filters and search game by name, navigate to game page with detailed information. If users are authenticated they can rate games and leave their comments in the discussion section. Admins and managers will be able to add, edit and delete games and all relevant information from the system.
 
-Backend [https://game-library-docker.onrender.com/games]
+Backend https://game-library-docker.onrender.com/games
 
-Frontend [https://game-library-frontend-git-main-stupachek.vercel.app/]
+Frontend https://game-library-frontend-git-main-stupachek.vercel.app/
 
 
 ## Main functionality:
